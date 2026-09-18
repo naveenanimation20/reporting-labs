@@ -134,6 +134,8 @@ export interface EnvRow { k: string; v: string; href?: string }
 
 export type Status = 'passed' | 'failed' | 'skipped' | 'flaky' | 'timedOut' | 'interrupted';
 
+export interface ErrorData { message: string; stack?: string; snippet?: string; location?: { file: string; line: number; column: number } }
+
 export interface StepData {
   title: string;
   category: string;
@@ -159,7 +161,7 @@ export interface ResultData {
   duration: number;
   startTime: number;
   workerIndex: number;
-  errors: { message: string; stack?: string; snippet?: string }[];
+  errors: ErrorData[];
   steps: StepData[];
   attachments: AttachmentData[];
   stdout: string[];
@@ -186,6 +188,15 @@ export interface TestData {
   outcome: Status;
   duration: number;
   results: ResultData[];
+  /** Playwright's expected status: 'failed' for test.fail(), 'skipped' for fixme/skip. */
+  expectedStatus?: string;
+  /** True when the test is marked test.fail() and failed as expected (counted as passed). */
+  expectedFailure?: boolean;
+  /** Explains an outcome that has no error of its own, e.g. a test.fail() test that unexpectedly passed. */
+  note?: string;
+  timeout?: number;
+  retries?: number;
+  column?: number;
 }
 
 export interface ReportData {
@@ -203,6 +214,13 @@ export interface ReportData {
   /** Directory the config lives in; test files are relative to it. */
   rootDir: string;
   env: EnvRow[];
+  /** Overall run status from Playwright: interrupted (Ctrl+C) or timedout (globalTimeout) mean tests did not finish. */
+  runStatus: 'passed' | 'failed' | 'timedout' | 'interrupted';
+  /** Errors reported outside any test: spec files that failed to load, global setup, worker crashes. */
+  globalErrors: ErrorData[];
+  /** Console output that was not attributed to a test. */
+  globalOutput: { stream: 'out' | 'err'; text: string }[];
+  shard?: { current: number; total: number };
   options: {
     logo?: string;
     accent?: string;
