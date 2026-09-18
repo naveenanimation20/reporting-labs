@@ -1,15 +1,17 @@
-<p align="center"><img src="assets/logo-wordmark.svg" alt="reporting-labs" width="360"></p>
+<p align="center"><img src="assets/logo-wordmark.svg" alt="reportingLabs" width="320"></p>
 
-# reporting-labs
+# reportingLabs
 
-Beautiful, single-file HTML reports for Playwright. One line of config, zero setup.
+Beautiful, single-file HTML test reports. One line of config, zero setup.
+
+reportingLabs is runner-agnostic by design: the report is built from a plain JSON model, and adapters feed it. The Playwright adapter ships today; WebdriverIO, Cypress and Jest/Vitest adapters are on the roadmap.
 
 ```bash
 npm i -D reporting-labs
 ```
 
 ```ts
-// playwright.config.ts
+// playwright.config.ts (Playwright adapter)
 export default defineConfig({
   reporter: [['reporting-labs', { title: 'My app – regression' }]],
 });
@@ -100,7 +102,7 @@ Failure clusters, Needs attention, and a By owner card that groups failures per 
 
 ## Environment, heatmap, skipped reasons
 
-- Environment card: Playwright and Node versions, OS, browsers from your projects, a link to the CI job (GitHub Actions, GitLab, Jenkins, CircleCI, Azure, Bitbucket) and the git commit with author and message. Add your own rows with `env: { 'App build': '2.4.0-rc3' }`.
+- Environment card: runner (e.g. Playwright) and Node versions, OS, browsers from your projects, a link to the CI job (GitHub Actions, GitLab, Jenkins, CircleCI, Azure, Bitbucket) and the git commit with author and message. Add your own rows with `env: { 'App build': '2.4.0-rc3' }`.
 - Heatmap: with more than one project, the Breakdown card gains a feature × project grid. Red cells mean failures (darker = larger share), amber flaky, green clean. Click a cell to filter.
 - Skipped card lists skipped tests with the reason from `test.skip(cond, 'reason')` / `test.fixme`, and the reason also shows in the test list.
 
@@ -116,7 +118,7 @@ Works with playwright-bdd or any Given/When/Then `test.step` titles: keywords ar
 
 ## Screenshots, videos, traces
 
-Nothing extra to do. Use Playwright's own settings and the report picks the attachments up:
+Nothing extra to do. Use your runner's own settings (Playwright shown) and the report picks the attachments up:
 
 ```ts
 use: {
@@ -168,9 +170,9 @@ reporter: [['reporting-labs', {
 
 ## Roadmap
 
+- WebdriverIO, Cypress, Jest/Vitest, JUnit XML adapters via the shared JSON schema
 - AI summary and failure clustering (bring your own API key)
 - Hosted history dashboard across branches/projects
-- WebdriverIO, Cypress, Jest/Vitest adapters via a shared JSON schema
 
 ## License
 

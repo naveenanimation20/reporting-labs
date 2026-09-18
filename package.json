@@ -1,14 +1,16 @@
 {
   "name": "reporting-labs",
   "version": "0.1.0",
-  "description": "Beautiful, customizable single-file HTML reports for Playwright. One line of config.",
+  "description": "reportingLabs \u2013 beautiful, customizable single-file HTML test reports. One line of config. Playwright adapter included, more runners on the way.",
   "keywords": [
-    "playwright",
+    "test-report",
+    "html-report",
     "reporter",
-    "html",
-    "report",
     "testing",
-    "qa"
+    "qa",
+    "test-automation",
+    "playwright",
+    "dashboard"
   ],
   "author": "Naveen Khunteta <naveen@naveenautomationlabs.com>",
   "license": "MIT",
