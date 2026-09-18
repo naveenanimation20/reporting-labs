@@ -3,7 +3,9 @@ import type {
 } from '@playwright/test/reporter';
 import * as fs from 'fs';
 import * as path from 'path';
-import { ReportingLabsOptions, ReportData, TestData, ResultData, StepData, AttachmentData, Status } from './types';
+import * as os from 'os';
+import { execSync } from 'child_process';
+import { ReportingLabsOptions, ReportData, TestData, ResultData, StepData, AttachmentData, Status, EnvRow } from './types';
 import { renderHtml } from './template';
 import { makeMasker, parseCsv } from './mask';
 import type { HistoryEntry } from './types';
@@ -51,11 +53,14 @@ export default class ReportingLabsReporter implements Reporter {
         return this.serializeResult(r, test);
       });
       const outcome = this.outcome(test);
+      const titlePath = this.titlePath(test);
+      const file = path.relative(this.config.configFile ? path.dirname(this.config.configFile) : this.config.rootDir, test.location.file).split(path.sep).join('/');
       tests.push({
         id: test.id,
+        key: `${project}::${file}::${[...titlePath, test.title].join(' › ')}`,
         title: test.title,
-        path: this.titlePath(test),
-        file: path.relative(this.config.configFile ? path.dirname(this.config.configFile) : this.config.rootDir, test.location.file),
+        path: titlePath,
+        file,
         line: test.location.line,
         project,
         tags: test.tags,
@@ -74,7 +79,10 @@ export default class ReportingLabsReporter implements Reporter {
     const histOn = this.options.history?.enabled ?? true;
     const { file: histFile, entries } = histOn ? this.loadHistory(base) : { file: '', entries: [] as HistoryEntry[] };
     const failedCount = stats.failed + stats.timedOut + stats.interrupted;
-    const current: HistoryEntry = { time: this.startTime, duration: result.duration ?? Date.now() - this.startTime, passed: stats.passed, failed: failedCount, flaky: stats.flaky, skipped: stats.skipped, total: stats.total, label: this.options.metadata?.build ?? this.options.metadata?.branch };
+    const code = (o: Status) => o === 'passed' ? 'p' : o === 'flaky' ? 'k' : o === 'skipped' ? 's' : 'f';
+    const perTest: Record<string, [string, number]> = {};
+    for (const t of tests) { const last = t.results[t.results.length - 1]; perTest[t.key] = [code(t.outcome), Math.round(last?.duration ?? t.duration)]; }
+    const current: HistoryEntry = { time: this.startTime, duration: result.duration ?? Date.now() - this.startTime, passed: stats.passed, failed: failedCount, flaky: stats.flaky, skipped: stats.skipped, total: stats.total, label: this.options.metadata?.build ?? this.options.metadata?.branch, tests: perTest };
     const history = [...entries, current].slice(-(this.options.history?.keep ?? 30));
     if (histOn) { try { fs.writeFileSync(histFile, JSON.stringify(history, null, 1)); } catch { /* read-only fs */ } }
     const bdd = this.options.bdd ?? tests.some(t => t.results.some(r => r.steps.some(st => /^(Given|When|Then|And|But)\b/.test(st.title))));
@@ -91,6 +99,8 @@ export default class ReportingLabsReporter implements Reporter {
       tests,
       history,
       bdd,
+      rootDir: base,
+      env: this.collectEnv(base),
       options: {
         logo: this.options.logo,
         accent: this.options.accent,
@@ -108,6 +118,9 @@ export default class ReportingLabsReporter implements Reporter {
           tags: this.options.widgets?.tags ?? true,
           slowest: this.options.widgets?.slowest ?? true,
           projects: this.options.widgets?.projects ?? true,
+          flaky: this.options.widgets?.flaky ?? true,
+          environment: this.options.widgets?.environment ?? true,
+          skipped: this.options.widgets?.skipped ?? true,
         },
         dimensions: this.dimensions(),
         dimensionOrder: {
@@ -118,6 +131,7 @@ export default class ReportingLabsReporter implements Reporter {
         project: this.options.project,
         links: this.options.links ?? {},
         customCss: this.options.customCss ?? '',
+        editorLinks: this.options.editorLinks ?? true,
       },
     };
 
@@ -130,6 +144,26 @@ export default class ReportingLabsReporter implements Reporter {
   }
 
   // ---- helpers -------------------------------------------------------------
+
+  /** Runtime facts for the Environment card: Playwright, Node, OS, browsers, CI job, git commit. */
+  private collectEnv(base: string): EnvRow[] {
+    const rows: EnvRow[] = [];
+    const env = process.env;
+    let pw = '';
+    try { pw = require('@playwright/test/package.json').version; } catch { /* not resolvable */ }
+    if (pw) rows.push({ k: 'Playwright', v: pw });
+    rows.push({ k: 'Node', v: process.version });
+    rows.push({ k: 'OS', v: `${os.type()} ${os.release()} (${os.arch()})` });
+    const browsers = [...new Set(this.config.projects.map(p => { const u: any = p.use ?? {}; return [u.browserName, u.channel].filter(Boolean).join('/') || (u.defaultBrowserType ?? ''); }).filter(Boolean))];
+    if (browsers.length) rows.push({ k: 'Browsers', v: browsers.join(', ') });
+    const ci = ciLink(env);
+    if (ci) rows.push({ k: 'CI', v: ci.name, href: ci.url });
+    const git = gitInfo(base, env);
+    if (git.sha) rows.push({ k: 'Commit', v: `${git.sha.slice(0, 7)}${git.author ? ' · ' + git.author : ''}${git.subject ? ' · ' + git.subject : ''}`, href: git.url });
+    if (git.branch && !this.options.metadata?.branch) rows.push({ k: 'Branch', v: git.branch });
+    for (const [k, v] of Object.entries(this.options.env ?? {})) rows.push({ k, v: String(v), href: /^https?:\/\//.test(String(v)) ? String(v) : undefined });
+    return rows;
+  }
 
   private toDataBlock(name: string, raw: string): ResultData['data'][number] {
     let v: any; try { v = JSON.parse(raw); } catch { return { name, kind: 'text', text: this.masker.maskStr(raw) }; }
@@ -273,6 +307,36 @@ export default class ReportingLabsReporter implements Reporter {
     }
     return null;
   }
+}
+
+function ciLink(env: NodeJS.ProcessEnv): { name: string; url?: string } | null {
+  if (env.GITHUB_ACTIONS && env.GITHUB_SERVER_URL && env.GITHUB_REPOSITORY && env.GITHUB_RUN_ID)
+    return { name: `GitHub Actions #${env.GITHUB_RUN_NUMBER ?? env.GITHUB_RUN_ID}`, url: `${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}` };
+  if (env.GITLAB_CI && env.CI_JOB_URL) return { name: `GitLab CI #${env.CI_PIPELINE_IID ?? env.CI_JOB_ID}`, url: env.CI_JOB_URL };
+  if (env.JENKINS_URL && env.BUILD_URL) return { name: `Jenkins ${env.JOB_NAME ?? ''} #${env.BUILD_NUMBER ?? ''}`.trim(), url: env.BUILD_URL };
+  if (env.CIRCLECI && env.CIRCLE_BUILD_URL) return { name: `CircleCI #${env.CIRCLE_BUILD_NUM ?? ''}`.trim(), url: env.CIRCLE_BUILD_URL };
+  if (env.TF_BUILD && env.SYSTEM_TEAMFOUNDATIONCOLLECTIONURI && env.SYSTEM_TEAMPROJECT && env.BUILD_BUILDID)
+    return { name: `Azure Pipelines #${env.BUILD_BUILDNUMBER ?? env.BUILD_BUILDID}`, url: `${env.SYSTEM_TEAMFOUNDATIONCOLLECTIONURI}${env.SYSTEM_TEAMPROJECT}/_build/results?buildId=${env.BUILD_BUILDID}` };
+  if (env.BITBUCKET_BUILD_NUMBER && env.BITBUCKET_GIT_HTTP_ORIGIN) return { name: `Bitbucket Pipelines #${env.BITBUCKET_BUILD_NUMBER}`, url: `${env.BITBUCKET_GIT_HTTP_ORIGIN}/addon/pipelines/home#!/results/${env.BITBUCKET_BUILD_NUMBER}` };
+  if (env.CI) return { name: 'CI' };
+  return null;
+}
+
+function gitInfo(cwd: string, env: NodeJS.ProcessEnv): { sha?: string; author?: string; subject?: string; branch?: string; url?: string } {
+  const out: { sha?: string; author?: string; subject?: string; branch?: string; url?: string } = {};
+  const run = (cmd: string) => { try { return execSync(cmd, { cwd, stdio: ['ignore', 'pipe', 'ignore'], timeout: 2000 }).toString().trim(); } catch { return ''; } };
+  const line = run('git log -1 --format=%H%x1f%an%x1f%s');
+  if (line) { const [sha, author, subject] = line.split('\x1f'); out.sha = sha; out.author = author; out.subject = subject; }
+  out.sha = out.sha || env.GITHUB_SHA || env.CI_COMMIT_SHA || env.GIT_COMMIT || env.CIRCLE_SHA1 || env.BUILD_SOURCEVERSION || undefined;
+  out.author = out.author || env.GITHUB_ACTOR || env.CI_COMMIT_AUTHOR || undefined;
+  const branch = run('git rev-parse --abbrev-ref HEAD');
+  out.branch = (branch && branch !== 'HEAD' ? branch : '') || env.GITHUB_REF_NAME || env.CI_COMMIT_REF_NAME || env.GIT_BRANCH || env.BUILD_SOURCEBRANCHNAME || undefined;
+  if (out.sha) {
+    if (env.GITHUB_SERVER_URL && env.GITHUB_REPOSITORY) out.url = `${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${out.sha}`;
+    else if (env.CI_PROJECT_URL) out.url = `${env.CI_PROJECT_URL}/-/commit/${out.sha}`;
+    else { const remote = run('git config --get remote.origin.url'); const m = remote.match(/github\.com[:/]([^/]+\/[^/.]+)/); if (m) out.url = `https://github.com/${m[1]}/commit/${out.sha}`; }
+  }
+  return out;
 }
 
 function extFor(ct: string) {
