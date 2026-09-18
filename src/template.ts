@@ -480,7 +480,7 @@ html,body{-webkit-font-smoothing:antialiased}
 /* run strip */
 .strip{margin-top:18px} .cell{height:14px;border-radius:3px}
 /* overview cards */
-.grid{gap:16px;margin-top:18px}
+.grid{gap:16px;margin-top:18px;align-items:stretch} .grid>.card{display:flex;flex-direction:column;min-height:0} .grid>.card>h2{flex:none}
 .attn button{padding:10px 6px;gap:12px;border-radius:8px;margin:0 -6px;width:calc(100% + 12px)}
 .attn button:hover{background:var(--surface-2)} .attn button:hover .t{color:var(--ink)}
 .attn .t{font-weight:500}
@@ -565,8 +565,8 @@ html,body{-webkit-font-smoothing:antialiased}
 .flk{list-style:none;margin:0;padding:0} .flk li{border-top:1px solid var(--line)} .flk li:first-child{border-top:0}
 .flk button{width:100%;text-align:left;padding:9px 4px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center}
 .flk .t{font-size:13px;font-weight:500} .flk .m{grid-column:1/-1;font:11.5px var(--mono);color:var(--ink-3)} .flk .proj{font:10px var(--mono);color:var(--ink-3);background:var(--surface-2);padding:1px 5px;border-radius:3px;margin-left:6px}
-.own{list-style:none;margin:0;padding:0} .own li{border-top:1px solid var(--line)} .own li:first-child{border-top:0}
-.own button{width:100%;text-align:left;padding:10px 4px;display:grid;grid-template-columns:auto 1fr auto;gap:2px 12px;align-items:center;border-radius:8px}
+.own{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px} .own li{border:1px solid var(--line);border-radius:10px;min-width:0}
+.own button{width:100%;text-align:left;padding:10px 12px;display:grid;grid-template-columns:auto 1fr auto;gap:2px 12px;align-items:center;border-radius:10px}
 .own button:hover{background:var(--surface-2)}
 .own .av{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent-tint);color:var(--accent-2);font-size:12px;font-weight:600;text-transform:uppercase;grid-row:span 2}
 .own .nm{font-weight:600} .own .cnts{display:flex;gap:6px} .own .cnts b{font:600 11px var(--mono);padding:2px 8px;border-radius:999px}
@@ -819,8 +819,8 @@ function slowerView(){
 }
 /* sparklines from the whole history (counts, no per-test data needed) */
 function spark(series, color, w, h2){
-  w=w||64; h2=h2||20; const n=series.length; if(n<2) return null;
-  const max=Math.max(...series,1), min=Math.min(...series,0);
+  w=w||64; h2=h2||20; const n=series.length; if(n<3) return null;
+  const max=Math.max(...series,1), min=Math.min(...series,0); if(Math.max(...series)===Math.min(...series)) return null;
   const x=i=>1+i/(n-1)*(w-2), y=v=>h2-2-(max===min?0.5:(v-min)/(max-min))*(h2-4);
   const pts=series.map((v,i)=>x(i)+','+y(v)).join(' ');
   return h('span',{class:'sp','aria-hidden':'true',html:'<svg viewBox="0 0 '+w+' '+h2+'" width="'+w+'" height="'+h2+'"><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" opacity=".9"/><circle cx="'+x(n-1)+'" cy="'+y(series[n-1])+'" r="2.2" fill="'+color+'"/></svg>'});
@@ -834,7 +834,7 @@ function byOwner(){
 }
 function ownerCard(){
   const rows=byOwner(); if(!rows.length) return null;
-  return h('div',{class:'card w6'}, h('h2',{},'By owner', h('span',{class:'hint'},rows.length+' owner'+(rows.length>1?'s':'')+' to ping')),
+  return h('div',{class:'card w12'}, h('h2',{},'By owner', h('span',{class:'hint'},rows.length+' owner'+(rows.length>1?'s':'')+' to ping')),
     h('ul',{class:'own'}, rows.map(o=>h('li',{}, h('button',{onclick:()=>{ if(o.owner!=='unassigned'&&DIMS.includes('owner')) state.dims.owner=o.owner; state.status='failed'; refresh(); showView('tests'); }},
       h('span',{class:'av'},initials(o.owner)[0]), h('span',{class:'nm'},o.owner),
       h('span',{class:'cnts'}, o.failed?h('b',{class:'f'},o.failed+' failed'):null, o.flaky?h('b',{class:'k'},o.flaky+' flaky'):null),
@@ -891,8 +891,8 @@ function skippedCard(){
   const sk=data.tests.filter(t=>t.outcome==='skipped'); if(!sk.length) return null;
   const withReason=sk.filter(skipReason).length;
   return h('div',{class:'card'}, h('h2',{},'Skipped', h('span',{class:'hint'},sk.length+' test'+(sk.length>1?'s':'')+(withReason<sk.length?' · '+(sk.length-withReason)+' without a reason':''))),
-    h('ul',{class:'skp'}, sk.slice(0,8).map(t=>h('li',{}, h('button',{onclick:()=>select(t.id)}, h('span',{class:'t'},t.title, data.projects.length>1?h('span',{class:'proj'},t.project):null), h('span',{class:'r'},skipReason(t)||'no reason given')))),
-      sk.length>8? h('li',{}, h('button',{onclick:()=>{state.status='skipped';refresh();showView('tests');}}, h('span',{class:'t',style:'color:var(--accent)'},'+'+(sk.length-8)+' more'))) : null));
+    h('ul',{class:'skp'}, sk.slice(0,6).map(t=>h('li',{}, h('button',{onclick:()=>select(t.id)}, h('span',{class:'t'},t.title, data.projects.length>1?h('span',{class:'proj'},t.project):null), h('span',{class:'r'},skipReason(t)||'no reason given')))),
+      sk.length>6? h('li',{}, h('button',{onclick:()=>{state.status='skipped';refresh();showView('tests');}}, h('span',{class:'t',style:'color:var(--accent)'},'+'+(sk.length-6)+' more'))) : null));
 }
 /* environment card */
 function envCard(){
@@ -1059,7 +1059,7 @@ function timeline(){
   return svg;
 }
 function slowest(){
-  const top=[...data.tests].filter(t=>t.outcome!=='skipped').sort((a,b)=>b.duration-a.duration).slice(0,6);
+  const top=[...data.tests].filter(t=>t.outcome!=='skipped').sort((a,b)=>b.duration-a.duration).slice(0,5);
   const max=top[0]?top[0].duration:1;
   return h('ul',{class:'slow'}, top.map(t=>h('li',{}, h('button',{onclick:()=>select(t.id)},
     h('span',{}, h('span',{class:'t'},t.title), h('span',{class:'bar',style:'--w:'+Math.max(4,Math.round(t.duration/max*100))+'%'}, h('i',{}))), h('span',{class:'d'},ms(t.duration))))));
