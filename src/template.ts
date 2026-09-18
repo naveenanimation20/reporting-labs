@@ -561,6 +561,24 @@ html,body{-webkit-font-smoothing:antialiased}
 .lb img{border-radius:10px}
 @media print{ .band{background:#fff!important;color:var(--ink)} .hdr h1,.hdr .proj-blk h1,.hdr .when,.hdr .proj-blk .sub{color:var(--ink)} .nav{display:none} .kpi.hero{background:var(--accent)!important} }
 
+/* ---------- triage lists: plain, dense, table-like ---------- */
+.attn-wrap{display:flex;flex-direction:column;flex:1;min-height:0}
+.attn2{width:100%;border-collapse:collapse;font-size:13px}
+.attn2 tr{cursor:pointer} .attn2 tr:hover td{background:var(--surface-2)} .attn2 tr:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.attn2 td{padding:9px 8px;border-top:1px solid var(--line);vertical-align:top} .attn2 tr:first-child td{border-top:0}
+.attn2 td:first-child{border-radius:6px 0 0 6px} .attn2 td:last-child{border-radius:0 6px 6px 0}
+.attn2 .pr{width:96px;white-space:nowrap;font-size:12.5px;line-height:1.35} .attn2 .pr .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px}
+.attn2 .pr span{font-weight:600;color:var(--ink)} .attn2 .pr small{display:block;color:var(--ink-3);font-size:11.5px;padding-left:15px}
+.attn2 .tt .n{font-weight:500;color:var(--ink);line-height:1.35} .attn2 .tt .s{font-size:12px;color:var(--ink-3);margin-top:2px} .attn2 .tt .s b.new{color:var(--fail);font-weight:600}
+.attn2 .ow{text-align:right;color:var(--ink-3);font-size:12.5px;white-space:nowrap;width:1%;padding-top:10px}
+.attn-foot{margin-top:auto;padding-top:12px;border-top:1px solid var(--line)} .attn-foot button{font-size:12.5px;font-weight:500;color:var(--accent-2)} .attn-foot button:hover{text-decoration:underline}
+.clu2{list-style:none;margin:0;padding:0}
+.clu2 li{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:11px 0;border-top:1px solid var(--line)} .clu2 li:first-child{border-top:0;padding-top:2px}
+.clu2 .n{font-size:20px;font-weight:600;color:var(--fail);font-variant-numeric:tabular-nums;line-height:1.1} .clu2 .n small{display:block;font-size:10.5px;color:var(--ink-3);font-weight:500;letter-spacing:.04em;margin-top:1px}
+.clu2 .b{min-width:0} .clu2 .msg{font:12.5px/1.45 var(--mono);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clu2 .who{font-size:12.5px;color:var(--ink-2);margin-top:4px;line-height:1.6} .clu2 .who button{color:var(--accent-2);font-weight:500} .clu2 .who button:hover{text-decoration:underline} .clu2 .who button small{color:var(--ink-3);font-weight:400;font-size:11px}
+.clu2 .who .sep{color:var(--line-2);margin:0 7px} .clu2 .who .ex{color:var(--ink-3)}
+@media (max-width:640px){.attn2 .ow{display:none} .attn2 .pr{width:72px} .attn2 .pr small{display:none}}
 /* ---------- triage extras: history, diff, export, env, heatmap ---------- */
 .kpi .sp{position:absolute;right:14px;top:14px;opacity:.9} .kpi.hero .sp{right:16px;top:14px}
 .kpi .sp svg{display:block}
@@ -575,12 +593,11 @@ html,body{-webkit-font-smoothing:antialiased}
 .flk button{width:100%;text-align:left;padding:9px 4px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center}
 .flk .t{font-size:13px;font-weight:500} .flk .m{grid-column:1/-1;font:11.5px var(--mono);color:var(--ink-3)} .flk .proj{font:10px var(--mono);color:var(--ink-3);background:var(--surface-2);padding:1px 5px;border-radius:3px;margin-left:6px}
 .own{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px} .own li{border:1px solid var(--line);border-radius:10px;min-width:0}
-.own button{width:100%;text-align:left;padding:10px 12px;display:grid;grid-template-columns:auto 1fr auto;gap:2px 12px;align-items:center;border-radius:10px}
+.own button{width:100%;text-align:left;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center;border-radius:10px}
 .own button:hover{background:var(--surface-2)}
-.own .av{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent-tint);color:var(--accent-2);font-size:12px;font-weight:600;text-transform:uppercase;grid-row:span 2}
-.own .nm{font-weight:600} .own .cnts{display:flex;gap:6px} .own .cnts b{font:600 11px var(--mono);padding:2px 8px;border-radius:999px}
-.own .cnts b.f{background:var(--fail-bg);color:var(--fail)} .own .cnts b.k{background:var(--flaky-bg);color:var(--flaky-ink)}
-.own .ts{grid-column:2/-1;font-size:12px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.own .nm{font-weight:600} .own .cnts{font-size:12.5px;color:var(--ink-3);white-space:nowrap} .own .cnts b{font-weight:600}
+.own .cnts b.f{color:var(--fail)} .own .cnts b.k{color:var(--flaky-ink)}
+.own .ts{grid-column:1/-1;font-size:12px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fx-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:-4px} .fx-tools .fx-sum{font-size:13px;color:var(--ink-2);font-weight:500} .fx-tools .spacer{flex:1}
 a.btn{text-decoration:none}
 .skp{list-style:none;margin:0;padding:0} .skp li{border-top:1px solid var(--line)} .skp li:first-child{border-top:0}
@@ -604,7 +621,7 @@ a.btn{text-decoration:none}
 .ediff.lines .ln{padding:1px 12px} .ediff.lines .ln.exp{background:var(--pass-bg);color:var(--pass)} .ediff.lines .ln.rcv{background:var(--fail-bg);color:var(--fail)} .ediff.lines .ln.hunk{color:var(--ink-3)}
 .errfull{margin-bottom:10px} .errfull summary{cursor:pointer;font-size:12px;color:var(--ink-2);margin-bottom:6px}
 .step .tb{width:96px;height:6px;border-radius:999px;background:var(--surface-2);overflow:hidden;flex:none} .step .tb i{display:block;height:100%;background:var(--accent);border-radius:999px;opacity:.85} .step .tb i.slow{background:var(--flaky);opacity:1}
-@media (max-width:700px){.ediff{grid-template-columns:1fr} .step .tb{width:48px} .kpi .sp{display:none} .attn button{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center} .attn .sev{order:1} .attn .m{order:2;margin-left:auto} .attn .t{order:3;flex:1 1 100%;flex-wrap:wrap;white-space:normal} .attn .t .tt{white-space:normal;flex:1 1 100%}}
+@media (max-width:700px){.ediff{grid-template-columns:1fr} .step .tb{width:48px} .kpi .sp{display:none}}
 @media print{.fx-tools .btn{display:none}}
 `;
 
@@ -755,8 +772,8 @@ function summary(){
   }
   const W=data.options.widgets, g=[];
   const hasFail=data.tests.some(t=>isFail(t.outcome)||t.outcome==='flaky');
-  if(W.attention && hasFail) g.push(h('div',{class:'card w6 fail-rail'}, h('h2',{},'Needs attention', h('span',{class:'hint'},'ranked by priority · severity'), h('span',{class:'hint badge'},(failed+s.flaky)+' open')), attention()));
-  const clusters=failureClusters(); if(clusters.length) g.push(h('div',{class:'card w6 fail-rail'}, h('h2',{},'Failure clusters', h('span',{class:'hint'},clusters.length+' root cause'+(clusters.length>1?'s':'')+' · '+clusters.reduce((a,c)=>a+c.tests.length,0)+' failures')), clustersView(clusters.slice(0,4)), clusters.length>4?h('button',{class:'btn more',style:'margin-top:10px',onclick:()=>showView('failures')},'All '+clusters.length+' clusters'):null));
+  if(W.attention && hasFail) g.push(h('div',{class:'card w6 fail-rail'}, h('h2',{},'Needs attention', h('span',{class:'hint'},(failed+s.flaky)+' open · ranked by priority and severity')), attention(8)));
+  const clusters=failureClusters(); if(clusters.length) g.push(h('div',{class:'card w6 fail-rail'}, h('h2',{},'Failure clusters', h('span',{class:'hint'},clusters.length+' root cause'+(clusters.length>1?'s':'')+' · '+clusters.reduce((a,c)=>a+c.tests.length,0)+' failures')), clustersView(clusters.slice(0,6)), clusters.length>6?h('div',{class:'attn-foot'}, h('button',{onclick:()=>showView('failures')},'View all '+clusters.length+' clusters →')):null));
   if(W.dimensions) g.push(h('div',{class:'card w8'}, h('h2',{},'Breakdown', h('span',{class:'hint'},'click a row to filter')), breakdown()));
   if(W.slowest){ const reg=regressions().length; g.push(h('div',{class:'card'}, h('h2',{},'Slowest tests', reg?h('span',{class:'hint badge'},reg+' got slower'):null), tabbed([['slow','Slowest',slowest],['reg','Got slower'+(reg?' ('+reg+')':''),slowerView]]))); }
   if(W.flaky!==false && HRUNS.length>1) g.push(h('div',{class:'card'}, h('h2',{},'Flakiest tests', h('span',{class:'hint'},'last '+Math.min(10,HRUNS.length)+' runs')), flakiest()));
@@ -845,8 +862,8 @@ function ownerCard(){
   const rows=byOwner(); if(!rows.length) return null;
   return h('div',{class:'card w12'}, h('h2',{},'By owner', h('span',{class:'hint'},rows.length+' owner'+(rows.length>1?'s':'')+' to ping')),
     h('ul',{class:'own'}, rows.map(o=>h('li',{}, h('button',{onclick:()=>{ if(o.owner!=='unassigned'&&DIMS.includes('owner')) state.dims.owner=o.owner; state.status='failed'; refresh(); showView('tests'); }},
-      h('span',{class:'av'},initials(o.owner)[0]), h('span',{class:'nm'},o.owner),
-      h('span',{class:'cnts'}, o.failed?h('b',{class:'f'},o.failed+' failed'):null, o.flaky?h('b',{class:'k'},o.flaky+' flaky'):null),
+      h('span',{class:'nm'},o.owner),
+      h('span',{class:'cnts'}, [o.failed?h('b',{class:'f'},o.failed+' failed'):null, o.failed&&o.flaky?' · ':null, o.flaky?h('b',{class:'k'},o.flaky+' flaky'):null]),
       h('span',{class:'ts'}, o.tests.slice(0,3).map(t=>t.title).join(' · ')+(o.tests.length>3?' · +'+(o.tests.length-3):'')))))));
 }
 /* export */
@@ -956,15 +973,22 @@ function donut(){
   const svg=h('div',{html:'<svg viewBox="0 0 132 132">'+arcs+'<text class="c" x="66" y="64" text-anchor="middle">'+rate+'%</text><text class="cl" x="66" y="80" text-anchor="middle">pass rate</text></svg>'}).firstChild;
   return h('div',{class:'donut'}, svg, h('div',{class:'legend'}, parts.map(([k,n])=>h('button',{onclick:()=>{state.status=k;refresh();showView('tests');}}, h('span',{class:'dot',style:'background:'+colorOf(k)}), h('span',{},label[k]), h('span',{class:'n'},n)))));
 }
-function attention(){
+function attention(limit){
   const bad=data.tests.filter(t=>isFail(t.outcome)||t.outcome==='flaky').sort((a,b)=>rank(a)-rank(b)||(isFail(b.outcome)-isFail(a.outcome))||b.duration-a.duration);
   if(!bad.length) return h('div',{class:'ok'},'No failures. Ship it.');
   const groups=new Map(); for(const t of bad){ const k=t.file+'::'+t.path.join('/')+'::'+t.title; const g=groups.get(k)||{t,projects:[]}; g.projects.push(t.project); groups.set(k,g); }
-  const rows=[...groups.values()].slice(0,7);
-  return h('ul',{class:'attn'}, rows.map(({t,projects})=>h('li',{}, h('button',{onclick:()=>select(t.id)},
-    h('span',{class:'sev'+(/^P0$/i.test(t.meta.priority||'')&&t.outcome!=='flaky'?' p0':''),style:t.outcome==='flaky'?'background:var(--flaky-bg);color:var(--flaky-ink)':''}, [t.meta.priority,t.meta.severity].filter(Boolean).join(' · ')||label[t.outcome]),
-    h('span',{class:'t'}, h('span',{class:'tt'},t.title), data.projects.length>1? h('span',{class:'proj'}, projects.length>1? projects.length+' projects' : projects[0]) : null, sinceBadge(t,'tag')),
-    h('span',{class:'m'}, t.meta.owner? [h('span',{class:'av','aria-hidden':'true'},initials(t.meta.owner)[0]), t.meta.owner] : (t.meta.feature||''))))), groups.size>rows.length? h('li',{}, h('button',{onclick:()=>showView('failures')}, h('span',{}), h('span',{class:'t',style:'color:var(--accent)'},'+'+(groups.size-rows.length)+' more in Failures'), h('span',{}))) : null);
+  const all=[...groups.values()], rows=limit?all.slice(0,limit):all;
+  const sub=(t,projects)=>{ const parts=[t.file.split('/').pop()];
+    if(data.projects.length>1) parts.push(projects.length>1? projects.length+' projects' : projects[0]);
+    const si=sinceInfo(t); if(si) parts.push(si.kind==='new'? h('b',{class:'new'},'new this run') : 'failing since '+runLabel(si.since));
+    else if(t.outcome==='flaky') parts.push('passed on retry '+t.results.length);
+    const out=[]; parts.forEach((x,k)=>{ if(k) out.push(' · '); out.push(x); }); return out; };
+  const tbl=h('table',{class:'attn2'}, h('tbody',{}, rows.map(({t,projects})=>h('tr',{tabindex:'0',onclick:()=>select(t.id),onkeydown:e=>{ if(e.key==='Enter') select(t.id); }},
+    h('td',{class:'pr'}, h('i',{class:'dot',style:'background:'+colorOf(bucket(t))}), h('span',{},t.meta.priority||label[t.outcome]), t.meta.severity? h('small',{},t.meta.severity) : null),
+    h('td',{class:'tt'}, h('div',{class:'n'},t.title), h('div',{class:'s'}, sub(t,projects))),
+    h('td',{class:'ow'}, t.meta.owner||'')))));
+  const more=all.length-rows.length;
+  return h('div',{class:'attn-wrap'}, tbl, more>0? h('div',{class:'attn-foot'}, h('button',{onclick:()=>showView('failures')}, 'View all '+all.length+' in Failures →')) : null);
 }
 function dimension(d){
   const vals=dimValues(d), keys=['passed','flaky','failed','skipped'];
@@ -1015,8 +1039,14 @@ function failureClusters(){
   return [...m.values()].sort((a,b)=>b.tests.length-a.tests.length);
 }
 function clustersView(cl){
-  return h('ul',{class:'clu'}, cl.map(c=>h('li',{}, h('div',{class:'top'}, h('div',{class:'msg',title:c.sample},c.sample), h('span',{class:'n'},c.tests.length+' test'+(c.tests.length>1?'s':''))),
-    h('div',{class:'who'}, c.tests.slice(0,8).map(t=>h('button',{onclick:()=>select(t.id)}, t.title+(data.projects.length>1?' · '+t.project:''))), c.tests.length>8?h('span',{class:'n'},'+'+(c.tests.length-8)):null))));
+  return h('ol',{class:'clu2'}, cl.map(c=>{
+    const byTitle=new Map(); for(const t of c.tests){ const g=byTitle.get(t.title)||[]; g.push(t); byTitle.set(t.title,g); }
+    const names=[...byTitle.entries()].slice(0,6), extra=byTitle.size-names.length;
+    const who=[]; names.forEach(([title,ts],k)=>{ if(k) who.push(h('span',{class:'sep'},'·')); who.push(h('button',{onclick:()=>select(ts[0].id),title:ts.map(t=>t.project).join(', ')}, title, data.projects.length>1&&ts.length>1? h('small',{},' ×'+ts.length) : null)); });
+    if(extra>0) who.push(h('span',{class:'sep'},'·'), h('span',{class:'ex'},'+'+extra+' more'));
+    return h('li',{}, h('span',{class:'n'}, c.tests.length, h('small',{},c.tests.length===1?'test':'tests')),
+      h('div',{class:'b'}, h('div',{class:'msg',title:c.sample}, c.sample.split('\n')[0]), h('div',{class:'who'}, who)));
+  }));
 }
 function trend(){
   const H=data.history, W=760, HT=170, padL=34, padR=12, padT=12, padB=26, n=H.length;
