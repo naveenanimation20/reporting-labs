@@ -582,16 +582,16 @@ html,body{-webkit-font-smoothing:antialiased}
 /* ---------- triage extras: history, diff, export, env, heatmap ---------- */
 .kpi .sp{position:absolute;right:14px;top:14px;opacity:.9} .kpi.hero .sp{right:16px;top:14px}
 .kpi .sp svg{display:block}
-.badge.since,.tag.since{font:600 10.5px var(--mono);padding:2px 7px;border-radius:999px;letter-spacing:.03em;white-space:nowrap;vertical-align:1px}
-.since.new{background:var(--fail);color:#fff} .since.known{background:var(--surface-2);color:var(--ink-2)}
+.badge.since{background:none;padding:0;border-radius:0;font-weight:500;font-size:12.5px} .badge.since.new{color:var(--fail);font-weight:600} .badge.since.known{color:var(--ink-3)}
+.since-txt{font-size:12.5px;white-space:nowrap} .since-txt.new{color:var(--fail);font-weight:600} .since-txt.known{color:var(--ink-2)}
 .attn .tag.since{margin-left:8px;flex:none} .attn .t{display:flex;align-items:center;min-width:0} .attn .t .tt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0} .attn .t .proj{flex:none}
 .detail h4 .hint{margin-left:8px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-3);font-size:12px}
 .dots{display:inline-flex;gap:3px;align-items:center;vertical-align:middle} .dots i{display:block;width:8px;height:8px;border-radius:2px;background:var(--skip-bg)}
 .dots i.p{background:var(--pass)} .dots i.f{background:var(--fail)} .dots i.k{background:var(--flaky)} .dots i.s{background:var(--skip)} .dots i.n{background:transparent;border:1px solid var(--line-2)}
-.badges .dots{margin-left:2px}
+.badges .dots{margin-left:2px;margin-right:4px}
 .flk{list-style:none;margin:0;padding:0} .flk li{border-top:1px solid var(--line)} .flk li:first-child{border-top:0}
 .flk button{width:100%;text-align:left;padding:9px 4px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center}
-.flk .t{font-size:13px;font-weight:500} .flk .m{grid-column:1/-1;font:11.5px var(--mono);color:var(--ink-3)} .flk .proj{font:10px var(--mono);color:var(--ink-3);background:var(--surface-2);padding:1px 5px;border-radius:3px;margin-left:6px}
+.flk .t{font-size:13px;font-weight:500;color:var(--ink)} .flk .m{grid-column:1/-1;font-size:12px;color:var(--ink-3)}
 .own{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px} .own li{border:1px solid var(--line);border-radius:10px;min-width:0}
 .own button{width:100%;text-align:left;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center;border-radius:10px}
 .own button:hover{background:var(--surface-2)}
@@ -602,7 +602,7 @@ html,body{-webkit-font-smoothing:antialiased}
 a.btn{text-decoration:none}
 .skp{list-style:none;margin:0;padding:0} .skp li{border-top:1px solid var(--line)} .skp li:first-child{border-top:0}
 .skp button{width:100%;text-align:left;padding:8px 4px;display:flex;flex-direction:column;gap:2px}
-.skp .t{font-size:13px} .skp .r{font-size:12px;color:var(--ink-3)} .skp .proj{font:10px var(--mono);color:var(--ink-3);background:var(--surface-2);padding:1px 5px;border-radius:3px;margin-left:6px}
+.skp .t{font-size:13px;font-weight:500;color:var(--ink)} .skp .r{font-size:12px;color:var(--ink-3)}
 .kv.env{grid-template-columns:max-content 1fr;gap:8px 16px} .kv.env dt{font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding-top:1px} .kv.env dd{font:12.5px var(--mono);word-break:break-word} .kv.env a{color:var(--accent-2)}
 .hm-wrap{overflow-x:auto} .hm{border-collapse:separate;border-spacing:4px;font-size:12.5px;min-width:100%}
 .hm th{font-weight:600;color:var(--ink-2);text-align:left;padding:4px 8px;white-space:nowrap} .hm thead th{font:600 11px var(--mono);color:var(--ink-3);text-align:center;letter-spacing:.03em}
@@ -694,7 +694,7 @@ function failuresView(){
     h('thead',{}, h('tr',{}, ['','Test','Spec','Priority','Owner','Ticket','Attempts',PREV.length?'Since':'',HRUNS.length>1?'History':'',''].map(x=>h('th',{},x)))),
     h('tbody',{}, rows.map(t=>{ const e=t.results[t.results.length-1].errors[0]; return h('tr',{onclick:()=>select(t.id)},
       h('td',{}, h('span',{class:'st '+t.outcome,style:'display:inline-block'})), h('td',{}, h('div',{},t.title), h('div',{class:'t',title:e?e.message:''}, e? e.message.split('\n')[0].slice(0,110):'')),
-      h('td',{class:'t'},t.file.split('/').pop()+(data.projects.length>1?' · '+t.project:'')), h('td',{},[t.meta.priority,t.meta.severity].filter(Boolean).join(' · ')), h('td',{},t.meta.owner||''), h('td',{},t.meta.story||t.meta.issue||''), h('td',{},t.results.length), PREV.length?h('td',{},sinceBadge(t,'tag')||h('span',{class:'t'},'–')):null, HRUNS.length>1?h('td',{},dots(t,10)):null, h('td',{class:'t'},ms(t.duration))); })))));
+      h('td',{class:'t'},t.file.split('/').pop()+(data.projects.length>1?' · '+t.project:'')), h('td',{},[t.meta.priority,t.meta.severity].filter(Boolean).join(' · ')), h('td',{},t.meta.owner||''), h('td',{},t.meta.story||t.meta.issue||''), h('td',{},t.results.length), PREV.length?h('td',{},(()=>{ const si=sinceInfo(t); return si? h('span',{class:'since-txt '+si.kind}, si.kind==='new'?'new':runLabel(si.since)) : h('span',{class:'t'},'–'); })()):null, HRUNS.length>1?h('td',{},dots(t,10)):null, h('td',{class:'t'},ms(t.duration))); })))));
   return grid;
 }
 function apiView(){
@@ -824,9 +824,9 @@ function flakiest(){
   const rows=data.tests.map(t=>({t, f:flakyScore(t)})).filter(x=>x.f.score>0).sort((a,b)=>b.f.score-a.f.score||b.f.k-a.f.k).slice(0,6);
   if(!rows.length) return h('div',{class:'ok'},'Nothing flaked across the last '+HRUNS.length+' runs.');
   return h('ul',{class:'flk'}, rows.map(({t,f})=>h('li',{}, h('button',{onclick:()=>select(t.id)},
-    h('span',{class:'t'}, t.title, data.projects.length>1?h('span',{class:'proj'},t.project):null),
+    h('span',{class:'t'}, t.title),
     dots(t,10),
-    h('span',{class:'m'}, (f.k?f.k+' flaky':'')+(f.k&&f.flips?' · ':'')+(f.flips?f.flips+' flip'+(f.flips>1?'s':''):'')+' / '+f.runs+' runs')))));
+    h('span',{class:'m'}, (data.projects.length>1? t.project+' · ' : '')+(f.k?f.k+' flaky':'')+(f.k&&f.flips?' · ':'')+(f.flips?f.flips+' flip'+(f.flips>1?'s':''):'')+' in '+f.runs+' runs')))));
 }
 /* duration regression vs the previous run that has this test */
 function lastDur(t){ const r=t.results[t.results.length-1]; return r?r.duration:t.duration; }
@@ -917,7 +917,7 @@ function skippedCard(){
   const sk=data.tests.filter(t=>t.outcome==='skipped'); if(!sk.length) return null;
   const withReason=sk.filter(skipReason).length;
   return h('div',{class:'card'}, h('h2',{},'Skipped', h('span',{class:'hint'},sk.length+' test'+(sk.length>1?'s':'')+(withReason<sk.length?' · '+(sk.length-withReason)+' without a reason':''))),
-    h('ul',{class:'skp'}, sk.slice(0,6).map(t=>h('li',{}, h('button',{onclick:()=>select(t.id)}, h('span',{class:'t'},t.title, data.projects.length>1?h('span',{class:'proj'},t.project):null), h('span',{class:'r'},skipReason(t)||'no reason given')))),
+    h('ul',{class:'skp'}, sk.slice(0,6).map(t=>h('li',{}, h('button',{onclick:()=>select(t.id)}, h('span',{class:'t'},t.title), h('span',{class:'r'},(data.projects.length>1? t.project+' · ' : '')+(skipReason(t)||'no reason given'))))),
       sk.length>6? h('li',{}, h('button',{onclick:()=>{state.status='skipped';refresh();showView('tests');}}, h('span',{class:'t',style:'color:var(--accent)'},'+'+(sk.length-6)+' more'))) : null));
 }
 /* environment card */
