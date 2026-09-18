@@ -1,0 +1,52 @@
+{
+  "name": "reporting-labs",
+  "version": "0.1.0",
+  "description": "Beautiful, customizable single-file HTML reports for Playwright. One line of config.",
+  "keywords": [
+    "playwright",
+    "reporter",
+    "html",
+    "report",
+    "testing",
+    "qa"
+  ],
+  "author": "Naveen Khunteta <naveen@naveenautomationlabs.com>",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./playwright": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "reporting-labs": "bin/cli.js",
+    "rlabs": "bin/cli.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "demo": "npm run build && cd example && npx playwright test; cd .. && echo 'open example/reporting-labs/index.html'"
+  },
+  "peerDependencies": {
+    "@playwright/test": ">=1.40.0"
+  },
+  "devDependencies": {
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/ibm-plex-sans": "^5.3.0",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^22.0.0",
+    "jsdom": "^30.1.0",
+    "typescript": "^5.6.0"
+  }
+}
