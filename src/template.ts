@@ -623,6 +623,35 @@ a.btn{text-decoration:none}
 .step .tb{width:96px;height:6px;border-radius:999px;background:var(--surface-2);overflow:hidden;flex:none} .step .tb i{display:block;height:100%;background:var(--accent);border-radius:999px;opacity:.85} .step .tb i.slow{background:var(--flaky);opacity:1}
 @media (max-width:700px){.ediff{grid-template-columns:1fr} .step .tb{width:48px} .kpi .sp{display:none}}
 @media print{.fx-tools .btn{display:none}}
+
+/* ---------- typography system: 3 sizes, sentence-case headings, weight for hierarchy, mono only for data ---------- */
+:root{--fs:13.5px;--fs-s:12px;--fs-n:28px;--fs-n2:20px}
+html,body{font-size:var(--fs)}
+/* sizes: everything secondary is 12px, everything primary is 13.5px */
+.hint,.card h2 .hint,.strip-cap,.legend-inline,.trend-cap,.kpi .l,.kpi .d,.chip,.hdr .when,.hdr .proj-blk .sub,.nav .cnt,.badge,.badge.tag,.badge.since,.since-txt,.loc,.crumb,.meta,.meta .k,.item .tt .p,.item .d,.file,.folder,.file-row,.kbd,.hint-kbd,.step .cat,.step .d,.step .e,.att figcaption,.vids figcaption,.cmp-cap,.cmp-side figcaption,.api-head .m,.api-head .d,.api-head .sc,.api-col h5,.api-col pre,.hist .l,.hist .v,.wk .k,.wk .n,.wk-sum,.dim .n,.dim .k,.tags button,.mask-note,.trace-how,.trace-how code,.tbl td,.kv2 dd,.logs,.txt,.apitbl th,.apitbl .u,.apitbl .t,.attn2 .pr,.attn2 .pr small,.attn2 .tt .s,.attn2 .ow,.clu2 .n small,.clu2 .msg,.clu2 .who,.clu2 .who button small,.flk .m,.skp .r,.own .cnts,.own .ts,.kv.env dt,.kv.env dd,.hm thead th,.hm td button,.ediff .lbl,.ediff .val,.ediff.lines,.errfull summary,.ttip,.ttip .tt-h span,.ttip .tt-big small,.tt-row,.fx-tools .fx-sum,.attn-foot button,.btn,.hdr .btn,.hdr select.pal,.bk-tabs button,.tools .seg button,.tools input,.tools select,.detail .actions .btn,.section .body code,.err summary,.err .stack,.dots+*{font-size:var(--fs-s)}
+.err,.step,.tab,.nav button,.item .tt .n,.attn2,.attn2 .tt .n,.flk .t,.skp .t,.slow li,.slow .t,.own .nm,.api-stats,.apitbl,.apitbl td,.section .body,.kv,.kv2,.proj .row,.detail h4,.tools input,.tools select,.clu2 .who,.ttip .tt-h,.pill,.empty,.ok,.hm,.hm th,.trace-card,.attn-foot button,.fx-tools .fx-sum{font-size:var(--fs)}
+.kpi .v,.kpi.hero .v{font-size:var(--fs-n)} .kpi .v small{font-size:var(--fs-s)}
+.clu2 .n,.ttip .tt-big{font-size:var(--fs-n2)} .detail h3{font-size:20px} .hdr h1,.hdr .proj-blk h1{font-size:18px}
+/* headings: sentence case, semibold, ink. Uppercase only on table headers */
+.card h2,.detail h4,.kpi .l,.meta .k,.kv.env dt,.api-col h5,.ediff .lbl,.hm thead th{text-transform:none;letter-spacing:0}
+.card h2{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:12px}
+.detail h4{font-weight:600;color:var(--ink);margin:22px 0 8px}
+.kpi .l{font-weight:500;color:var(--ink-3)} .kpi.hero .l{color:rgba(255,255,255,.8)}
+.meta .k,.kv.env dt,.api-col h5{font-weight:500;color:var(--ink-3)}
+.apitbl th{text-transform:uppercase;letter-spacing:.05em;font-size:11.5px;font-weight:600;color:var(--ink-3)}
+.hm thead th{font-weight:600;color:var(--ink-2);font-family:var(--sans)}
+/* weight carries hierarchy: titles 500, body 400, numbers 600. Blue text only on links */
+.attn2 .tt .n,.flk .t,.skp .t,.slow .t,.item .tt .n,.own .nm,.clu2 .who button,.attn-foot button{font-weight:500}
+.kpi .v,.clu2 .n,.ttip .tt-big,.own .cnts b,.dim .n b,.api-stats b{font-weight:600}
+.file{color:var(--ink-2);font-weight:500} .step .kw{color:var(--ink);font-weight:600} .step .kw.and{color:var(--ink-3);font-weight:500}
+.nav button[aria-selected=true]{color:var(--ink)} .nav button[aria-selected=true] .cnt{background:var(--surface-2);color:var(--ink-2)}
+.bk-tabs button[aria-selected=true],.tools .seg button[aria-pressed=true]{color:var(--ink)}
+.tab[aria-selected=true]{color:var(--ink)} .section .body code{color:var(--ink-2);background:var(--surface-2)}
+.ttip .tt-h{font-weight:600} .attn2 .pr span{font-weight:600}
+/* mono only where the text is data: paths, ids, durations, errors, payloads */
+.nav .cnt,.chip,.step .cat,.folder,.item .d,.dim .k,.wk .n,.wk-sum,.attn2 .pr,.clu2 .n small,.flk .m,.own .cnts,.ediff .lbl,.ttip .tt-h span,.tags button,.hint-kbd,.trace-how,.api-col h5,.meta .k,.kv.env dt,.apitbl th,.hm thead th,.hm td button{font-family:var(--sans)}
+.chip b,.loc,.file,.file-row,.kbd,.slow .d,.step .d,.hist .l,.wk .k,.tbl td,.kv2 dd,.kv.env dd,.logs,.txt,.err,.ediff .val,.ediff.lines,.clu2 .msg,.apitbl .u,.api-head .m,.api-head .sc,.api-head .d,.api-col pre,.badge.tag,.trend text,.tl text,.attn2 .tt .s .mono,.trace-how code{font-family:var(--mono)}
+.chip{font-family:var(--sans)} .chip b{font-weight:500}
 `;
 
 const JS = String.raw`
