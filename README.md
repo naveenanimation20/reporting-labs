@@ -22,6 +22,7 @@ Run your tests. Open `reporting-labs/index.html`. That's it.
 - Searchable test list with status and project filters.
 - Steps tree, errors with stack traces, screenshots (inline, click to zoom), traces/videos as links, console output, annotations, tags.
 - Retries shown as tabs. Flaky tests flagged.
+- New vs known failures: every failure says `NEW` or `since #1838`, the Failed tile counts them, and the Failures view exports to CSV/JSON.
 - Blue and white look with light and dark theme, follows your OS. Toggle in the header.
 - Single HTML file – attach it to CI, email it, open it anywhere.
 
@@ -82,6 +83,31 @@ Any meta key with a template becomes a clickable chip. Values that are already U
 - Test list groups by spec file, folder tree, or flat. "By spec file" chart shows which files are red.
 - Trend: the reporter keeps `reporting-labs.history.json` next to your config (last 30 runs by default) and draws pass rate, fail rate and duration across runs. Commit the file or cache it in CI to keep the history.
 
+## Triage across runs
+
+The history file also stores each test's outcome and duration per run, so the report can answer the questions you ask first:
+
+- New vs known: a failure that passed in the previous run is badged `NEW`; one that has been red for a while shows `since #1838`. The Failed tile splits the count (`2 new · 10 known`), the Needs attention list, the Failures table, the test detail and the copied summary all carry it.
+- Flaky history: every failed or flaky test shows its last 10 runs as dots (green/red/amber), and a Flakiest tests card ranks tests by flaky retries and pass/fail flips.
+- Duration regression: the Slowest card gets a Got slower tab with tests that took 2× longer than in the previous run (and at least 500 ms more).
+- Sparklines on the KPI tiles show how passed, failed, flaky and skipped counts moved over the last 12 runs.
+
+## Failures view
+
+Failure clusters, Needs attention, and a By owner card that groups failures per owner so you know exactly who to ping (click an owner to filter the test list). Download CSV / Download JSON export the failed and flaky tests with title, spec, project, priority, severity, owner, ticket, attempts, duration, first error line and the new/known status, ready for Jira or a sheet. Copy summary adds a `By owner:` line.
+
+## Environment, heatmap, skipped reasons
+
+- Environment card: Playwright and Node versions, OS, browsers from your projects, a link to the CI job (GitHub Actions, GitLab, Jenkins, CircleCI, Azure, Bitbucket) and the git commit with author and message. Add your own rows with `env: { 'App build': '2.4.0-rc3' }`.
+- Heatmap: with more than one project, the Breakdown card gains a feature × project grid. Red cells mean failures (darker = larger share), amber flaky, green clean. Click a cell to filter.
+- Skipped card lists skipped tests with the reason from `test.skip(cond, 'reason')` / `test.fixme`, and the reason also shows in the test list.
+
+## Inside a test
+
+- Expected vs received diff: `expect` failures render side by side with the differing characters highlighted, and `- Expected / + Received` object diffs are colored line by line. The full message and stack stay one click away.
+- Step timeline: every step has a bar showing its share of the test duration, amber when a single step takes 30 % or more.
+- Open in VS Code: a link on every test opens the spec at the right line (`vscode://file/...`). Turn it off with `editorLinks: false`.
+
 ## BDD
 
 Works with playwright-bdd or any Given/When/Then `test.step` titles: keywords are highlighted, describe blocks show as Features, tests as Scenarios. Force it with `bdd: true`.
@@ -123,7 +149,9 @@ reporter: [['reporting-labs', {
   theme: 'auto',                     // 'light' | 'dark' | 'auto'
   outputFolder: 'reporting-labs',
   metadata: { env: 'staging', branch: process.env.GIT_BRANCH ?? 'main', build: process.env.BUILD_ID ?? 'local' },
-  widgets: { runStrip: true, outcome: true, attention: true, dimensions: true, timeline: true, durations: true, slowest: true, projects: true, tags: true },
+  widgets: { runStrip: true, outcome: true, attention: true, dimensions: true, timeline: true, durations: true, slowest: true, projects: true, tags: true, flaky: true, environment: true, skipped: true },
+  env: { 'App build': '2.4.0-rc3' }, // extra rows for the Environment card
+  editorLinks: true,                 // "Open in VS Code" link on every test
   dimensions: ['priority', 'severity', 'feature', 'owner'],
   sections: [{ title: 'Release notes', html: '<p>Checkout v2 at 50% rollout.</p>' }],
   customCss: '.hdr h1 { text-transform: uppercase }',

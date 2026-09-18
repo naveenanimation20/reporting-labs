@@ -34,6 +34,12 @@ export interface ReportingLabsOptions {
     tags?: boolean;
     slowest?: boolean;
     projects?: boolean;
+    /** Flakiest tests over the run history. Default: true */
+    flaky?: boolean;
+    /** Environment card (Playwright, Node, OS, browsers, CI, commit). Default: true */
+    environment?: boolean;
+    /** Skipped tests with their reasons. Default: true */
+    skipped?: boolean;
   };
   /**
    * Annotation/tag keys treated as chart dimensions (priority, severity, owner...).
@@ -58,8 +64,12 @@ export interface ReportingLabsOptions {
   links?: Record<string, string>;
   /** Keys (case-insensitive substrings) whose values are masked in test data and API panels. */
   maskKeys?: string[];
-  /** Keep a rolling run history next to the report and draw a trend chart. */
+  /** Keep a rolling run history next to the report and draw a trend chart. Per-test outcomes are stored too, which powers new-vs-known failures, flaky history and duration regressions. */
   history?: { enabled?: boolean; file?: string; keep?: number };
+  /** Extra rows for the Environment card, e.g. { 'App version': '2.4.0', 'Test data': 'staging-seed-12' }. Values that are URLs become links. */
+  env?: Record<string, string>;
+  /** Show an "Open in VS Code" link on every test (vscode://file/...). Default: true */
+  editorLinks?: boolean;
   /** Style Given/When/Then steps as Gherkin and label describe blocks as Features/Scenarios. Default: auto-detect */
   bdd?: boolean;
 }
@@ -116,7 +126,11 @@ export interface HistoryEntry {
   duration: number;
   passed: number; failed: number; flaky: number; skipped: number; total: number;
   label?: string;
+  /** Per-test outcome and last-attempt duration, keyed by TestData.key. Codes: p passed, f failed, k flaky, s skipped. */
+  tests?: Record<string, [string, number]>;
 }
+
+export interface EnvRow { k: string; v: string; href?: string }
 
 export type Status = 'passed' | 'failed' | 'skipped' | 'flaky' | 'timedOut' | 'interrupted';
 
@@ -157,6 +171,8 @@ export interface ResultData {
 
 export interface TestData {
   id: string;
+  /** Stable identity across runs: project, file and full title. Used to match history entries. */
+  key: string;
   title: string;
   /** describe blocks, outermost first */
   path: string[];
@@ -184,6 +200,9 @@ export interface ReportData {
   tests: TestData[];
   history: HistoryEntry[];
   bdd: boolean;
+  /** Directory the config lives in; test files are relative to it. */
+  rootDir: string;
+  env: EnvRow[];
   options: {
     logo?: string;
     accent?: string;
@@ -197,5 +216,6 @@ export interface ReportData {
     project?: ReportingLabsOptions['project'];
     links: Record<string, string>;
     customCss: string;
+    editorLinks: boolean;
   };
 }

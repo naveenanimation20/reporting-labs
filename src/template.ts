@@ -551,6 +551,52 @@ html,body{-webkit-font-smoothing:antialiased}
 .toast{background:var(--accent-2);color:#fff}
 .lb img{border-radius:10px}
 @media print{ .band{background:#fff!important;color:var(--ink)} .hdr h1,.hdr .proj-blk h1,.hdr .when,.hdr .proj-blk .sub{color:var(--ink)} .nav{display:none} .kpi.hero{background:var(--accent)!important} }
+
+/* ---------- triage extras: history, diff, export, env, heatmap ---------- */
+.kpi .sp{position:absolute;right:14px;top:14px;opacity:.9} .kpi.hero .sp{right:16px;top:14px}
+.kpi .sp svg{display:block}
+.badge.since,.tag.since{font:600 10.5px var(--mono);padding:2px 7px;border-radius:999px;letter-spacing:.03em;white-space:nowrap;vertical-align:1px}
+.since.new{background:var(--fail);color:#fff} .since.known{background:var(--surface-2);color:var(--ink-2)}
+.attn .tag.since{margin-left:8px;flex:none} .attn .t{display:flex;align-items:center;min-width:0} .attn .t .tt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0} .attn .t .proj{flex:none}
+.detail h4 .hint{margin-left:8px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-3);font-size:12px}
+.dots{display:inline-flex;gap:3px;align-items:center;vertical-align:middle} .dots i{display:block;width:8px;height:8px;border-radius:2px;background:var(--skip-bg)}
+.dots i.p{background:var(--pass)} .dots i.f{background:var(--fail)} .dots i.k{background:var(--flaky)} .dots i.s{background:var(--skip)} .dots i.n{background:transparent;border:1px solid var(--line-2)}
+.badges .dots{margin-left:2px}
+.flk{list-style:none;margin:0;padding:0} .flk li{border-top:1px solid var(--line)} .flk li:first-child{border-top:0}
+.flk button{width:100%;text-align:left;padding:9px 4px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center}
+.flk .t{font-size:13px;font-weight:500} .flk .m{grid-column:1/-1;font:11.5px var(--mono);color:var(--ink-3)} .flk .proj{font:10px var(--mono);color:var(--ink-3);background:var(--surface-2);padding:1px 5px;border-radius:3px;margin-left:6px}
+.own{list-style:none;margin:0;padding:0} .own li{border-top:1px solid var(--line)} .own li:first-child{border-top:0}
+.own button{width:100%;text-align:left;padding:10px 4px;display:grid;grid-template-columns:auto 1fr auto;gap:2px 12px;align-items:center;border-radius:8px}
+.own button:hover{background:var(--surface-2)}
+.own .av{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent-tint);color:var(--accent-2);font-size:12px;font-weight:600;text-transform:uppercase;grid-row:span 2}
+.own .nm{font-weight:600} .own .cnts{display:flex;gap:6px} .own .cnts b{font:600 11px var(--mono);padding:2px 8px;border-radius:999px}
+.own .cnts b.f{background:var(--fail-bg);color:var(--fail)} .own .cnts b.k{background:var(--flaky-bg);color:var(--flaky-ink)}
+.own .ts{grid-column:2/-1;font-size:12px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fx-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:-4px} .fx-tools .fx-sum{font-size:13px;color:var(--ink-2);font-weight:500} .fx-tools .spacer{flex:1}
+a.btn{text-decoration:none}
+.skp{list-style:none;margin:0;padding:0} .skp li{border-top:1px solid var(--line)} .skp li:first-child{border-top:0}
+.skp button{width:100%;text-align:left;padding:8px 4px;display:flex;flex-direction:column;gap:2px}
+.skp .t{font-size:13px} .skp .r{font-size:12px;color:var(--ink-3)} .skp .proj{font:10px var(--mono);color:var(--ink-3);background:var(--surface-2);padding:1px 5px;border-radius:3px;margin-left:6px}
+.kv.env{grid-template-columns:max-content 1fr;gap:8px 16px} .kv.env dt{font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding-top:1px} .kv.env dd{font:12.5px var(--mono);word-break:break-word} .kv.env a{color:var(--accent-2)}
+.hm-wrap{overflow-x:auto} .hm{border-collapse:separate;border-spacing:4px;font-size:12.5px;min-width:100%}
+.hm th{font-weight:600;color:var(--ink-2);text-align:left;padding:4px 8px;white-space:nowrap} .hm thead th{font:600 11px var(--mono);color:var(--ink-3);text-align:center;letter-spacing:.03em}
+.hm td{padding:0;border-radius:8px;text-align:center;min-width:90px} .hm td button{width:100%;padding:9px 8px;font-variant-numeric:tabular-nums;border-radius:8px} .hm td small{color:inherit;opacity:.65;margin-left:2px}
+.hm td.ok{background:var(--pass-bg);color:var(--pass)} .hm td.warn{background:var(--flaky-bg);color:var(--flaky-ink)} .hm td.bad{background:color-mix(in srgb,var(--fail) calc(var(--a,.5)*100%),var(--surface))} .hm td b{color:inherit}
+.grid>.fx-tools{grid-column:span 12}
+.hm td.none{color:var(--ink-3);padding:9px 8px;background:var(--surface-2)}
+.hm td button:hover{outline:2px solid var(--accent);outline-offset:-2px}
+.ediff{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.ediff .side{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.ediff .lbl{font:600 11px var(--mono);letter-spacing:.04em;padding:6px 10px;border-bottom:1px solid var(--line)}
+.ediff .exp .lbl{background:var(--pass-bg);color:var(--pass)} .ediff .rcv .lbl{background:var(--fail-bg);color:var(--fail)}
+.ediff .val{font:12.5px/1.6 var(--mono);padding:10px 12px;white-space:pre-wrap;word-break:break-word;color:var(--ink)}
+.ediff mark{border-radius:3px;padding:0 1px;color:inherit} .ediff mark.del{background:var(--pass-bg);text-decoration:line-through;text-decoration-color:var(--pass)} .ediff mark.ins{background:var(--fail-bg);box-shadow:inset 0 -2px var(--fail)}
+.ediff.lines{display:block;border:1px solid var(--line);border-radius:8px;overflow:hidden;font:12.5px/1.55 var(--mono);white-space:pre-wrap;word-break:break-word}
+.ediff.lines .ln{padding:1px 12px} .ediff.lines .ln.exp{background:var(--pass-bg);color:var(--pass)} .ediff.lines .ln.rcv{background:var(--fail-bg);color:var(--fail)} .ediff.lines .ln.hunk{color:var(--ink-3)}
+.errfull{margin-bottom:10px} .errfull summary{cursor:pointer;font-size:12px;color:var(--ink-2);margin-bottom:6px}
+.step .tb{width:96px;height:6px;border-radius:999px;background:var(--surface-2);overflow:hidden;flex:none} .step .tb i{display:block;height:100%;background:var(--accent);border-radius:999px;opacity:.85} .step .tb i.slow{background:var(--flaky);opacity:1}
+@media (max-width:700px){.ediff{grid-template-columns:1fr} .step .tb{width:48px} .kpi .sp{display:none} .attn button{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center} .attn .sev{order:1} .attn .m{order:2;margin-left:auto} .attn .t{order:3;flex:1 1 100%;flex-wrap:wrap;white-space:normal} .attn .t .tt{white-space:normal;flex:1 1 100%}}
+@media print{.fx-tools .btn{display:none}}
 `;
 
 const JS = String.raw`
@@ -563,6 +609,10 @@ const isFail = s => s==='failed'||s==='timedOut'||s==='interrupted';
 const colorOf = k => k==='passed'?'var(--pass)':k==='flaky'?'var(--flaky)':k==='skipped'?'var(--skip)':'var(--fail)';
 const bucket = t => isFail(t.outcome)?'failed':t.outcome;
 const label = {passed:'Passed',failed:'Failed',flaky:'Flaky',skipped:'Skipped',timedOut:'Timed out',interrupted:'Interrupted'};
+const HIST = data.history||[];
+const HRUNS = HIST.filter(e=>e&&e.tests);                 // entries that carry per-test outcomes; the last one is this run
+const PREV = HRUNS.length>1 ? HRUNS.slice(0,-1) : [];      // earlier runs only
+const runLabel = e => e.label || new Date(e.time).toLocaleDateString(undefined,{month:'short',day:'numeric'});
 
 const state = { q:'', status:'all', project:'all', dims:{}, selected:null, retry:null, group:'file', open:{}, view:'overview' };
 const DIMS = data.options.dimensions.filter(d=>data.tests.some(t=>t.meta[d]));
@@ -608,14 +658,17 @@ function failuresView(){
   if(!bad.length) return h('div',{class:'card'}, h('div',{style:'font-size:18px;color:var(--pass);font-weight:600'},'No failures.'), h('div',{style:'color:var(--ink-3);margin-top:6px'},'Every test that ran passed on the first attempt.'));
   const cl=failureClusters();
   const grid=h('div',{class:'grid'});
+  grid.append(h('div',{class:'w12 fx-tools'}, h('span',{class:'fx-sum'}, bad.length+' failed or flaky', PREV.length? ' · '+bad.filter(t=>isFail(t.outcome)&&sinceInfo(t).kind==='new').length+' new since '+runLabel(PREV[PREV.length-1]) : ''), h('span',{class:'spacer'}),
+    h('button',{class:'btn',onclick:exportCsv,title:'Failures as CSV for Jira or a sheet'},'Download CSV'), h('button',{class:'btn',onclick:exportJson,title:'Failures as JSON'},'Download JSON'), h('button',{class:'btn primary',onclick:e=>copyText(summaryMarkdown(),e.currentTarget,'Copied for Slack')},'Copy summary')));
   if(cl.length) grid.append(h('div',{class:'card w6 fail-rail'}, h('h2',{},'Failure clusters', h('span',{class:'hint'},cl.length+' distinct error'+(cl.length>1?'s':''))), clustersView(cl)));
   if(DIMS.length) grid.append(h('div',{class:'card w6 fail-rail'}, h('h2',{},'Needs attention', h('span',{class:'hint'},'ranked by priority and severity')), attention()));
+  const oc=ownerCard(); if(oc) grid.append(oc);
   const rows=[...bad].sort((a,b)=>rank(a)-rank(b)||b.duration-a.duration);
   grid.append(h('div',{class:'card w12'}, h('h2',{},rows.length+' failed or flaky tests'), h('table',{class:'apitbl'},
-    h('thead',{}, h('tr',{}, ['','Test','Spec','Priority','Owner','Ticket','Attempts',''].map(x=>h('th',{},x)))),
+    h('thead',{}, h('tr',{}, ['','Test','Spec','Priority','Owner','Ticket','Attempts',PREV.length?'Since':'',HRUNS.length>1?'History':'',''].map(x=>h('th',{},x)))),
     h('tbody',{}, rows.map(t=>{ const e=t.results[t.results.length-1].errors[0]; return h('tr',{onclick:()=>select(t.id)},
       h('td',{}, h('span',{class:'st '+t.outcome,style:'display:inline-block'})), h('td',{}, h('div',{},t.title), h('div',{class:'t',title:e?e.message:''}, e? e.message.split('\n')[0].slice(0,110):'')),
-      h('td',{class:'t'},t.file.split('/').pop()+(data.projects.length>1?' · '+t.project:'')), h('td',{},[t.meta.priority,t.meta.severity].filter(Boolean).join(' · ')), h('td',{},t.meta.owner||''), h('td',{},t.meta.story||t.meta.issue||''), h('td',{},t.results.length), h('td',{class:'t'},ms(t.duration))); })))));
+      h('td',{class:'t'},t.file.split('/').pop()+(data.projects.length>1?' · '+t.project:'')), h('td',{},[t.meta.priority,t.meta.severity].filter(Boolean).join(' · ')), h('td',{},t.meta.owner||''), h('td',{},t.meta.story||t.meta.issue||''), h('td',{},t.results.length), PREV.length?h('td',{},sinceBadge(t,'tag')||h('span',{class:'t'},'–')):null, HRUNS.length>1?h('td',{},dots(t,10)):null, h('td',{class:'t'},ms(t.duration))); })))));
   return grid;
 }
 function apiView(){
@@ -644,9 +697,10 @@ function copyText(txt,btn,done){ const ok=()=>{ if(btn){ const o=btn.textContent
 function summaryMarkdown(){
   const s=data.stats, f=s.failed+s.timedOut+s.interrupted, ran=s.total-s.skipped, rate=ran?Math.round(s.passed/ran*100):0;
   const meta=Object.entries(data.metadata).map(([k,v])=>k+': '+v).join(' · ');
-  const lines=['*'+data.title+'* — '+(f?':red_circle:':':large_green_circle:')+' '+rate+'% passed ('+s.passed+'/'+ran+')'+(f?', '+f+' failed':'')+(s.flaky?', '+s.flaky+' flaky':'')+(s.skipped?', '+s.skipped+' skipped':'')+' · '+ms(data.duration)+(meta?' · '+meta:'')];
+  const lines=['*'+data.title+'* — '+(f?':red_circle:':':large_green_circle:')+' '+rate+'% passed ('+s.passed+'/'+ran+')'+(f?', '+f+' failed'+(PREV.length?' ('+data.tests.filter(t=>isFail(t.outcome)&&sinceInfo(t).kind==='new').length+' new)':''):'')+(s.flaky?', '+s.flaky+' flaky':'')+(s.skipped?', '+s.skipped+' skipped':'')+' · '+ms(data.duration)+(meta?' · '+meta:'')];
   const bad=data.tests.filter(t=>isFail(t.outcome)).sort((a,b)=>rank(a)-rank(b)).slice(0,10);
   if(bad.length){ lines.push('Failures:'); for(const t of bad) lines.push('• '+[t.meta.priority,t.meta.severity].filter(Boolean).join('/')+(t.meta.priority||t.meta.severity?' ':'')+t.title+(t.meta.owner?' ('+t.meta.owner+')':'')+(t.meta.story?' '+t.meta.story:'')); if(f>bad.length) lines.push('… and '+(f-bad.length)+' more'); }
+  const owners=byOwner(); if(owners.length>1||(owners.length===1&&owners[0].owner!=='unassigned')) lines.push('By owner: '+owners.map(o=>o.owner+' '+(o.failed?o.failed:'')+(o.failed&&o.flaky?'+':'')+(o.flaky?o.flaky+' flaky':'')).join(' · '));
   return lines.join('\n');
 }
 function header(){
@@ -678,13 +732,14 @@ function summary(){
   const rate = ran? Math.round(s.passed/ran*100):0;
   const parts=[]; if(failed)parts.push(failed+' failed'); if(s.flaky)parts.push(s.flaky+' flaky'); if(s.skipped)parts.push(s.skipped+' skipped');
   const nClu=failureClusters().length;
+  const nNew=PREV.length? data.tests.filter(t=>isFail(t.outcome)&&sinceInfo(t).kind==='new').length : null;
   const el = h('section',{class:'sum'},
     h('div',{class:'kpis'},
       hero(),
-      pill('passed','Passed',s.passed,'var(--pass)', ok&&s.passed? 'Every test on first attempt' : 'On first attempt'),
-      pill('failed','Failed',failed,'var(--fail)', failed? nClu+' root cause'+(nClu===1?'':'s') : 'Nothing broke', failed?'down':''),
-      pill('flaky','Flaky',s.flaky,'var(--flaky)', s.flaky? 'Passed on retry' : 'No retries needed'),
-      pill('skipped','Skipped',s.skipped,'var(--skip)', s.skipped? 'Not executed' : 'Everything ran')));
+      pill('passed','Passed',s.passed,'var(--pass)', ok&&s.passed? 'Every test on first attempt' : 'On first attempt', '', hseries(e=>e.passed)),
+      pill('failed','Failed',failed,'var(--fail)', failed? (nNew!=null? nNew+' new · '+(failed-nNew)+' known' : nClu+' root cause'+(nClu===1?'':'s')) : 'Nothing broke', failed?'down':'', hseries(e=>e.failed)),
+      pill('flaky','Flaky',s.flaky,'var(--flaky)', s.flaky? 'Passed on retry' : 'No retries needed', '', hseries(e=>e.flaky)),
+      pill('skipped','Skipped',s.skipped,'var(--skip)', s.skipped? 'Not executed' : 'Everything ran', '', hseries(e=>e.skipped))));
   if(data.options.widgets.runStrip && data.tests.length){
     const strip = h('div',{class:'strip',id:'strip'}, data.tests.map(t=>h('button',{class:'cell '+t.outcome,'data-id':t.id,title:t.title+' · '+label[t.outcome]+' · '+ms(t.duration),'aria-label':t.title,onclick:()=>select(t.id)})));
     el.append(strip, h('div',{class:'strip-cap'}, 'Every test in run order. Hover for details, click to open.'));
@@ -694,21 +749,173 @@ function summary(){
   if(W.attention && hasFail) g.push(h('div',{class:'card w6 fail-rail'}, h('h2',{},'Needs attention', h('span',{class:'hint'},'ranked by priority · severity'), h('span',{class:'hint badge'},(failed+s.flaky)+' open')), attention()));
   const clusters=failureClusters(); if(clusters.length) g.push(h('div',{class:'card w6 fail-rail'}, h('h2',{},'Failure clusters', h('span',{class:'hint'},clusters.length+' root cause'+(clusters.length>1?'s':'')+' · '+clusters.reduce((a,c)=>a+c.tests.length,0)+' failures')), clustersView(clusters.slice(0,4)), clusters.length>4?h('button',{class:'btn more',style:'margin-top:10px',onclick:()=>showView('failures')},'All '+clusters.length+' clusters'):null));
   if(W.dimensions) g.push(h('div',{class:'card w8'}, h('h2',{},'Breakdown', h('span',{class:'hint'},'click a row to filter')), breakdown()));
-  if(W.slowest) g.push(h('div',{class:'card'}, h('h2',{},'Slowest tests'), slowest()));
+  if(W.slowest){ const reg=regressions().length; g.push(h('div',{class:'card'}, h('h2',{},'Slowest tests', reg?h('span',{class:'hint badge'},reg+' got slower'):null), tabbed([['slow','Slowest',slowest],['reg','Got slower'+(reg?' ('+reg+')':''),slowerView]]))); }
+  if(W.flaky!==false && HRUNS.length>1) g.push(h('div',{class:'card'}, h('h2',{},'Flakiest tests', h('span',{class:'hint'},'last '+Math.min(10,HRUNS.length)+' runs')), flakiest()));
+  if(W.skipped!==false) { const sc=skippedCard(); if(sc) g.push(sc); }
+  if(W.environment!==false) { const ec=envCard(); if(ec) g.push(ec); }
   if(data.history.length>1) g.push(h('div',{class:'card w12'}, h('h2',{},'Trend', h('span',{class:'hint'},'last '+data.history.length+' runs')), trend()));
   if(g.length) el.append(h('div',{class:'grid'}, g));
   for(const sec of data.options.sections) el.append(h('div',{class:'card section'}, h('h2',{},sec.title), h('div',{class:'body',html:sec.html})));
   return el;
 }
-function pill(key,text,n,color,sub,tone){
+function pill(key,text,n,color,sub,tone,series){
   return h('button',{class:'pill kpi','aria-pressed':state.status===key,'data-k':key,style:'--c:'+color,title:'Show '+text.toLowerCase()+' tests',onclick:()=>{state.status=key;refresh();if(key!=='all')showView('tests');}},
-    h('div',{class:'l'},text), h('div',{class:'v'},n), h('div',{class:'d '+(tone||'')},sub||''));
+    series? spark(series,color) : null, h('div',{class:'l'},text), h('div',{class:'v'},n), h('div',{class:'d '+(tone||'')},sub||''));
 }
 function initials(name){ return (name||'').split(/[\s\-–—·]+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'R'; }
 function prevRun(){
   const H=data.history||[]; if(H.length<2) return null;
   const cur=H[H.length-1]; for(let i=H.length-2;i>=0;i--){ if(!cur.label||H[i].label!==cur.label) return H[i]; }
   return H[H.length-2];
+}
+
+/* ---------- run history per test ---------- */
+function runsOf(t){ return HRUNS.map(e=>({e, r:(t.key&&e.tests[t.key])||null})); }
+/* new vs known: walk back through earlier runs while the test kept failing */
+function sinceInfo(t){
+  if(!PREV.length||!isFail(t.outcome)) return null;
+  let since=null, seen=false;
+  for(let i=PREV.length-1;i>=0;i--){ const r=PREV[i].tests[t.key]; if(!r) continue; seen=true; if(r[0]==='f') since=PREV[i]; else break; }
+  if(!seen) return {kind:'new', label:'New test'};
+  return since ? {kind:'known', since, label:'since '+runLabel(since)} : {kind:'new', label:'New'};
+}
+function sinceBadge(t, cls){
+  const si=sinceInfo(t); if(!si) return null;
+  return h('span',{class:(cls||'badge')+' since '+si.kind, title:si.kind==='new'?'Passed in the previous run':'Has been failing since '+runLabel(si.since)}, si.kind==='new'?'NEW':si.label);
+}
+/* last N runs as dots */
+function dots(t, n){
+  const rs=runsOf(t).slice(-(n||10)); if(rs.length<2) return null;
+  return h('span',{class:'dots','aria-label':'Last '+rs.length+' runs'}, rs.map(({e,r})=>h('i',{class:r?r[0]:'n', title:runLabel(e)+' · '+(r?({p:'passed',f:'failed',k:'flaky',s:'skipped'})[r[0]]:'not run')})));
+}
+function flakyScore(t){
+  const rs=runsOf(t).map(x=>x.r&&x.r[0]).filter(c=>c&&c!=='s'); let k=0, flips=0;
+  for(let i=0;i<rs.length;i++){ if(rs[i]==='k') k++; if(i&&rs[i]!==rs[i-1]&&(rs[i]!=='k'&&rs[i-1]!=='k')) flips++; }
+  return {k, flips, runs:rs.length, score:k*2+flips};
+}
+function flakiest(){
+  if(HRUNS.length<2) return h('div',{class:'empty'},'Run a few more times: flaky history builds up from reporting-labs.history.json.');
+  const rows=data.tests.map(t=>({t, f:flakyScore(t)})).filter(x=>x.f.score>0).sort((a,b)=>b.f.score-a.f.score||b.f.k-a.f.k).slice(0,6);
+  if(!rows.length) return h('div',{class:'ok'},'Nothing flaked across the last '+HRUNS.length+' runs.');
+  return h('ul',{class:'flk'}, rows.map(({t,f})=>h('li',{}, h('button',{onclick:()=>select(t.id)},
+    h('span',{class:'t'}, t.title, data.projects.length>1?h('span',{class:'proj'},t.project):null),
+    dots(t,10),
+    h('span',{class:'m'}, (f.k?f.k+' flaky':'')+(f.k&&f.flips?' · ':'')+(f.flips?f.flips+' flip'+(f.flips>1?'s':''):'')+' / '+f.runs+' runs')))));
+}
+/* duration regression vs the previous run that has this test */
+function lastDur(t){ const r=t.results[t.results.length-1]; return r?r.duration:t.duration; }
+function prevDur(t){ for(let i=PREV.length-1;i>=0;i--){ const r=PREV[i].tests[t.key]; if(r&&r[0]!=='s') return {ms:r[1], e:PREV[i]}; } return null; }
+function regressions(){
+  const out=[]; for(const t of data.tests){ if(t.outcome==='skipped') continue; const p=prevDur(t); if(!p||p.ms<=0) continue; const cur=lastDur(t); if(cur>=p.ms*2&&cur-p.ms>=500) out.push({t,prev:p.ms,cur,ratio:cur/p.ms}); }
+  return out.sort((a,b)=>b.ratio-a.ratio);
+}
+function slowerView(){
+  if(!PREV.length) return h('div',{class:'empty'},'Needs a previous run to compare against.');
+  const rows=regressions().slice(0,6);
+  if(!rows.length) return h('div',{class:'ok'},'No test got 2× slower than last run.');
+  return h('ul',{class:'slow'}, rows.map(({t,prev,cur,ratio})=>h('li',{}, h('button',{onclick:()=>select(t.id)},
+    h('span',{}, h('span',{class:'t'},t.title), h('span',{class:'bar',style:'--w:'+Math.min(100,Math.round(prev/cur*100))+'%'}, h('i',{style:'background:var(--flaky)'}))),
+    h('span',{class:'d'}, h('b',{style:'color:var(--fail)'},'×'+(ratio>=10?Math.round(ratio):ratio.toFixed(1))), ' ', ms(prev)+' → '+ms(cur))))));
+}
+/* sparklines from the whole history (counts, no per-test data needed) */
+function spark(series, color, w, h2){
+  w=w||64; h2=h2||20; const n=series.length; if(n<2) return null;
+  const max=Math.max(...series,1), min=Math.min(...series,0);
+  const x=i=>1+i/(n-1)*(w-2), y=v=>h2-2-(max===min?0.5:(v-min)/(max-min))*(h2-4);
+  const pts=series.map((v,i)=>x(i)+','+y(v)).join(' ');
+  return h('span',{class:'sp','aria-hidden':'true',html:'<svg viewBox="0 0 '+w+' '+h2+'" width="'+w+'" height="'+h2+'"><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" opacity=".9"/><circle cx="'+x(n-1)+'" cy="'+y(series[n-1])+'" r="2.2" fill="'+color+'"/></svg>'});
+}
+function hseries(f){ return HIST.slice(-12).map(f); }
+/* owner rollup for the Failures view and the copied summary */
+function byOwner(){
+  const m=new Map();
+  for(const t of data.tests){ if(!isFail(t.outcome)&&t.outcome!=='flaky') continue; const o=t.meta.owner||'unassigned'; const e=m.get(o)||{owner:o,failed:0,flaky:0,tests:[]}; if(isFail(t.outcome)) e.failed++; else e.flaky++; e.tests.push(t); m.set(o,e); }
+  return [...m.values()].sort((a,b)=>b.failed-a.failed||b.flaky-a.flaky||a.owner.localeCompare(b.owner));
+}
+function ownerCard(){
+  const rows=byOwner(); if(!rows.length) return null;
+  return h('div',{class:'card w6'}, h('h2',{},'By owner', h('span',{class:'hint'},rows.length+' owner'+(rows.length>1?'s':'')+' to ping')),
+    h('ul',{class:'own'}, rows.map(o=>h('li',{}, h('button',{onclick:()=>{ if(o.owner!=='unassigned'&&DIMS.includes('owner')) state.dims.owner=o.owner; state.status='failed'; refresh(); showView('tests'); }},
+      h('span',{class:'av'},initials(o.owner)[0]), h('span',{class:'nm'},o.owner),
+      h('span',{class:'cnts'}, o.failed?h('b',{class:'f'},o.failed+' failed'):null, o.flaky?h('b',{class:'k'},o.flaky+' flaky'):null),
+      h('span',{class:'ts'}, o.tests.slice(0,3).map(t=>t.title).join(' · ')+(o.tests.length>3?' · +'+(o.tests.length-3):'')))))));
+}
+/* export */
+function download(name, text, type){
+  const blob=new Blob([text],{type:type||'text/plain'}); const url=URL.createObjectURL(blob);
+  const a=h('a',{href:url,download:name,style:'display:none'}); document.body.append(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},500);
+}
+function csvCell(v){ v=v==null?'':String(v); return /[",\n]/.test(v)? '"'+v.replace(/"/g,'""')+'"' : v; }
+function failureRows(){
+  const bad=data.tests.filter(t=>isFail(t.outcome)||t.outcome==='flaky').sort((a,b)=>rank(a)-rank(b));
+  return bad.map(t=>{ const r=t.results[t.results.length-1], e=r&&r.errors[0], si=sinceInfo(t);
+    return { title:t.title, suite:t.path.join(' > '), file:t.file, line:t.line, project:t.project, outcome:label[t.outcome], since:si?(si.kind==='new'?'new':runLabel(si.since)):'', priority:t.meta.priority||'', severity:t.meta.severity||'', owner:t.meta.owner||'', feature:t.meta.feature||'', story:t.meta.story||t.meta.issue||'', epic:t.meta.epic||'', attempts:t.results.length, duration_ms:Math.round(t.duration), error:e?e.message.split('\n')[0]:'', tags:t.tags.join(' ') }; });
+}
+function exportCsv(){ const rows=failureRows(); if(!rows.length) return; const cols=Object.keys(rows[0]); download(fileStem()+'-failures.csv', [cols.join(','), ...rows.map(r=>cols.map(c=>csvCell(r[c])).join(','))].join('\n'), 'text/csv'); }
+function exportJson(){ const rows=failureRows().map(r=>{ const t=data.tests.find(x=>x.title===r.title&&x.project===r.project&&x.file===r.file); const res=t&&t.results[t.results.length-1]; return Object.assign({}, r, {errorFull:res&&res.errors[0]?res.errors[0].message:''}); });
+  download(fileStem()+'-failures.json', JSON.stringify({title:data.title, generatedAt:new Date(data.generatedAt).toISOString(), metadata:data.metadata, stats:data.stats, failures:rows},null,2), 'application/json'); }
+function fileStem(){ return (data.title||'report').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)||'report'; }
+/* expected vs received diff */
+function tokenDiff(a,b){
+  const byChar=a.length<=160&&b.length<=160;
+  const ta=byChar?[...a]:a.split(/(\s+)/).filter(x=>x!==''), tb=byChar?[...b]:b.split(/(\s+)/).filter(x=>x!=='');
+  const n=ta.length, m=tb.length; if(n*m>250000) return null;
+  const L=Array.from({length:n+1},()=>new Uint16Array(m+1));
+  for(let i=n-1;i>=0;i--) for(let j=m-1;j>=0;j--) L[i][j]=ta[i]===tb[j]?L[i+1][j+1]+1:Math.max(L[i+1][j],L[i][j+1]);
+  const A=[], B=[]; let i=0,j=0;
+  while(i<n&&j<m){ if(ta[i]===tb[j]){A.push([ta[i],0]);B.push([tb[j],0]);i++;j++;} else if(L[i+1][j]>=L[i][j+1]){A.push([ta[i],1]);i++;} else {B.push([tb[j],1]);j++;} }
+  while(i<n){A.push([ta[i++],1]);} while(j<m){B.push([tb[j++],1]);}
+  const join=(arr,cls)=>{ const out=[]; for(const [t,d] of arr){ const last=out[out.length-1]; if(last&&last.d===d) last.t+=t; else out.push({t,d}); } return out.map(x=>x.d?h('mark',{class:cls},x.t):x.t); };
+  return {a:join(A,'del'), b:join(B,'ins')};
+}
+function errorView(e){
+  const msg=e.message||'';
+  const box=h('div',{class:'err'}, msg, e.stack&&e.stack!==msg? h('details',{}, h('summary',{},'Stack trace'), h('div',{class:'stack'},e.stack)) : null);
+  const ex=msg.match(/^(Expected[^:\n]{0,40}):[ \t]*(.+)$/m), rc=msg.match(/^(Received[^:\n]{0,40}):[ \t]*(.+)$/m);
+  if(ex&&rc&&ex[2].trim()&&rc[2].trim()&&ex[2].length<2000&&rc[2].length<2000){
+    const d=tokenDiff(ex[2].trim(), rc[2].trim());
+    if(d){ return h('div',{}, h('div',{class:'ediff'},
+      h('div',{class:'side exp'}, h('div',{class:'lbl'},ex[1]), h('div',{class:'val'},d.a)),
+      h('div',{class:'side rcv'}, h('div',{class:'lbl'},rc[1]), h('div',{class:'val'},d.b))),
+      h('details',{class:'errfull'}, h('summary',{},'Full message'), box)); }
+  }
+  const lines=msg.split('\n');
+  if(lines.some(l=>/^- /.test(l))&&lines.some(l=>/^\+ /.test(l))){
+    return h('div',{}, h('div',{class:'ediff lines'}, lines.map(l=>h('div',{class:'ln '+(/^- /.test(l)?'exp':/^\+ /.test(l)?'rcv':/^@@/.test(l)?'hunk':'')},l))), h('details',{class:'errfull'}, h('summary',{},'Full message'), box));
+  }
+  return box;
+}
+/* skipped reasons */
+function skipReason(t){ const a=t.annotations.find(x=>/^(skip|fixme|slow)$/i.test(x.type)&&x.description); return a? (a.type.toLowerCase()==='fixme'?'fixme: ':'')+a.description : (t.annotations.some(x=>/^fixme$/i.test(x.type))?'fixme':''); }
+function skippedCard(){
+  const sk=data.tests.filter(t=>t.outcome==='skipped'); if(!sk.length) return null;
+  const withReason=sk.filter(skipReason).length;
+  return h('div',{class:'card'}, h('h2',{},'Skipped', h('span',{class:'hint'},sk.length+' test'+(sk.length>1?'s':'')+(withReason<sk.length?' · '+(sk.length-withReason)+' without a reason':''))),
+    h('ul',{class:'skp'}, sk.slice(0,8).map(t=>h('li',{}, h('button',{onclick:()=>select(t.id)}, h('span',{class:'t'},t.title, data.projects.length>1?h('span',{class:'proj'},t.project):null), h('span',{class:'r'},skipReason(t)||'no reason given')))),
+      sk.length>8? h('li',{}, h('button',{onclick:()=>{state.status='skipped';refresh();showView('tests');}}, h('span',{class:'t',style:'color:var(--accent)'},'+'+(sk.length-8)+' more'))) : null));
+}
+/* environment card */
+function envCard(){
+  const rows=(data.env||[]); const meta=Object.entries(data.metadata||{});
+  if(!rows.length&&!meta.length) return null;
+  return h('div',{class:'card'}, h('h2',{},'Environment'),
+    h('dl',{class:'kv env'}, rows.map(r=>[h('dt',{},r.k), h('dd',{}, r.href? h('a',{href:r.href,target:'_blank',rel:'noopener'},r.v) : r.v)])));
+}
+/* feature × project heatmap */
+function heatmap(){
+  const d=DIMS.includes('feature')?'feature':DIMS[0]; const vals=dimValues(d), ps=data.projects;
+  const cell=(v,p)=>{ const ts=data.tests.filter(t=>t.meta[d]===v&&t.project===p); const f=ts.filter(t=>isFail(t.outcome)).length, k=ts.filter(t=>t.outcome==='flaky').length; return {ts,f,k}; };
+  return h('div',{class:'hm-wrap'}, h('table',{class:'hm'},
+    h('thead',{}, h('tr',{}, h('th',{},d), ps.map(p=>h('th',{},p)))),
+    h('tbody',{}, vals.map(v=>h('tr',{}, h('th',{},v), ps.map(p=>{ const c=cell(v,p); if(!c.ts.length) return h('td',{class:'none'},'–');
+      const cls=c.f?'bad':c.k?'warn':'ok', ratio=c.f/c.ts.length;
+      return h('td',{class:cls,style:c.f?'--a:'+(0.25+ratio*0.75)+';color:'+(ratio>=0.5?'#fff':'var(--fail)'):'',title:c.ts.length+' tests · '+c.f+' failed · '+c.k+' flaky'}, h('button',{onclick:()=>{ state.dims[d]=v; state.project=p; state.status='all'; refresh(); showView('tests'); }}, c.f? h('b',{},c.f+' ✕') : c.k? h('b',{},c.k+' ~') : '✓', h('small',{},'/'+c.ts.length))); }))))),
+    h('div',{class:'legend-inline'}, h('span',{style:'--c:var(--pass-bg)'},'all passed'), h('span',{style:'--c:var(--flaky-bg)'},'flaky'), h('span',{style:'--c:var(--fail)'},'failed, darker = higher share'), h('span',{style:'--c:transparent;margin-left:auto'},'click a cell to filter')));
+}
+function editorLink(t){
+  if(data.options.editorLinks===false||!data.rootDir) return null;
+  const root=String(data.rootDir).replace(/\\/g,'/').replace(/\/$/,''); const abs=root+'/'+t.file;
+  return h('a',{class:'btn',href:'vscode://file'+(abs.startsWith('/')?'':'/')+abs+':'+t.line,title:'Open '+t.file+':'+t.line+' in VS Code'},'Open in VS Code');
 }
 function hero(){
   const s=data.stats, failed=s.failed+s.timedOut+s.interrupted, ran=s.total-s.skipped, total=s.total||1;
@@ -721,6 +928,7 @@ function hero(){
   if(prev){ const pr=prev.total-prev.skipped, prate=pr?Math.round(prev.passed/pr*100):0, d=rate-prate; delta=(d===0?'Same as':d>0?'Up '+d+' pts from':'Down '+Math.abs(d)+' pts from')+' '+(prev.label||'last run'); }
   else delta=ok? 'Nothing to worry about.' : failed+' failed'+(s.flaky?', '+s.flaky+' flaky':'')+(s.skipped?', '+s.skipped+' skipped':'');
   return h('button',{class:'pill kpi hero','aria-pressed':state.status==='all','data-k':'all',title:'Show all tests',onclick:()=>{state.status='all';refresh();showView('tests');}},
+    spark(hseries(e=>{ const rn=e.total-e.skipped; return rn?Math.round(e.passed/rn*100):0; }),'#fff'),
     ring,
     h('div',{class:'body'},
       h('div',{class:'l'}, ok? 'All passed' : 'Pass rate'),
@@ -746,7 +954,7 @@ function attention(){
   const rows=[...groups.values()].slice(0,7);
   return h('ul',{class:'attn'}, rows.map(({t,projects})=>h('li',{}, h('button',{onclick:()=>select(t.id)},
     h('span',{class:'sev'+(/^P0$/i.test(t.meta.priority||'')&&t.outcome!=='flaky'?' p0':''),style:t.outcome==='flaky'?'background:var(--flaky-bg);color:var(--flaky-ink)':''}, [t.meta.priority,t.meta.severity].filter(Boolean).join(' · ')||label[t.outcome]),
-    h('span',{class:'t'}, t.title, data.projects.length>1? h('span',{class:'proj'}, projects.length>1? projects.length+' projects' : projects[0]) : null),
+    h('span',{class:'t'}, h('span',{class:'tt'},t.title), data.projects.length>1? h('span',{class:'proj'}, projects.length>1? projects.length+' projects' : projects[0]) : null, sinceBadge(t,'tag')),
     h('span',{class:'m'}, t.meta.owner? [h('span',{class:'av','aria-hidden':'true'},initials(t.meta.owner)[0]), t.meta.owner] : (t.meta.feature||''))))), groups.size>rows.length? h('li',{}, h('button',{onclick:()=>showView('failures')}, h('span',{}), h('span',{class:'t',style:'color:var(--accent)'},'+'+(groups.size-rows.length)+' more in Failures'), h('span',{}))) : null);
 }
 function dimension(d){
@@ -771,11 +979,18 @@ function tagsChart(){
   return h('div',{class:'tags'}, list.map(([g,e])=>h('button',{onclick:()=>{ const inp=document.querySelector('.tools input'); inp.value=g; state.q=g.toLowerCase(); refresh(); showView('tests'); }}, g, h('span',{class:'bar'}, h('i',{style:'width:'+((e.n-e.f)/e.n*100)+'%;background:var(--pass)'}), h('i',{style:'width:'+(e.f/e.n*100)+'%;background:var(--fail)'})), h('span',{style:'color:var(--ink-3)'},e.n))));
 }
 
+function tabbed(tabs){
+  let cur=tabs[0][0]; const bar=h('div',{class:'bk-tabs'}), body=h('div',{});
+  const render=()=>{ body.innerHTML=''; body.append(tabs.find(t=>t[0]===cur)[2]()); bar.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.k===cur)); };
+  for(const [k,l] of tabs) bar.append(h('button',{'data-k':k,onclick:()=>{cur=k;render();}},l));
+  render(); return h('div',{}, bar, body);
+}
 function breakdown(){
   const tabs=[...DIMS.map(d=>[d,d[0].toUpperCase()+d.slice(1),()=>dimension(d)])];
   if(data.tests.length>1) tabs.push(['file','Spec file',byFile]);
   if(data.projects.length>1&&data.options.widgets.projects) tabs.push(['project','Project',projects]);
   if(data.options.widgets.tags&&data.tests.some(t=>t.tags.length)) tabs.push(['tags','Tags',tagsChart]);
+  if(data.projects.length>1&&DIMS.length) tabs.push(['heat','Heatmap',heatmap]);
   if(!tabs.length) return h('div',{class:'empty'},'Add meta({ priority, severity, owner, feature }) to your tests to see breakdowns here.');
   let cur=tabs[0][0]; const bar=h('div',{class:'bk-tabs'}), body=h('div',{});
   const render=()=>{ body.innerHTML=''; body.append(tabs.find(t=>t[0]===cur)[2]()); bar.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.k===cur)); };
@@ -861,7 +1076,7 @@ function projects(){
 
 /* ---------- main ---------- */
 function main(){
-  const projSel = h('select',{onchange:e=>{state.project=e.target.value;refresh();}}, h('option',{value:'all'},'All projects'), data.projects.map(p=>h('option',{value:p},p)));
+  const projSel = h('select',{id:'projsel',onchange:e=>{state.project=e.target.value;refresh();}}, h('option',{value:'all'},'All projects'), data.projects.map(p=>h('option',{value:p},p)));
   return h('div',{class:'main'},
     h('aside',{class:'list'},
       h('div',{class:'tools'}, h('input',{type:'search',placeholder:'Search tests, tags, files…',oninput:e=>{state.q=e.target.value.toLowerCase();refresh();}}), data.projects.length>1?projSel:null,
@@ -884,6 +1099,7 @@ function refresh(){
   document.querySelectorAll('.pill').forEach(p=>p.setAttribute('aria-pressed',p.dataset.k===state.status));
   document.querySelectorAll('.dim .row').forEach(r=>{ const card=r.closest('.card'); const d=card.querySelector('h2').textContent.replace(/^By /,''); r.setAttribute('aria-pressed', state.dims[d]===r.querySelector('.k').textContent); });
   document.querySelectorAll('select[data-dim]').forEach(sel=>{ sel.value=state.dims[sel.dataset.dim]||''; });
+  const ps=$('#projsel'); if(ps) ps.value=state.project;
   const vis=visible(), ids=new Set(vis.map(t=>t.id));
   document.querySelectorAll('.cell').forEach(c=>c.classList.toggle('dim',!ids.has(c.dataset.id)));
   const box=$('#items'); box.innerHTML='';
@@ -891,7 +1107,7 @@ function refresh(){
   document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.g===state.group));
   const item=t=>h('button',{class:'item','data-id':t.id,'aria-current':state.selected===t.id,onclick:()=>select(t.id)},
       h('span',{class:'st '+t.outcome}),
-      h('span',{class:'tt'}, t.path.length?h('div',{class:'p'},t.path.join(' › ')):null, h('div',{class:'n'},t.title), h('div',{class:'d'}, ms(t.duration)+(t.results.length>1?' · '+t.results.length+' attempts':'')+(data.projects.length>1?' · '+t.project:''))));
+      h('span',{class:'tt'}, t.path.length?h('div',{class:'p'},t.path.join(' › ')):null, h('div',{class:'n'},t.title), h('div',{class:'d'}, ms(t.duration)+(t.results.length>1?' · '+t.results.length+' attempts':'')+(data.projects.length>1?' · '+t.project:'')+(t.outcome==='skipped'&&skipReason(t)?' · '+skipReason(t):''))));
   const counts=ts=>{ const f=ts.filter(t=>isFail(t.outcome)).length; return h('span',{class:'cnt'}, f?h('b',{},f+' ✕'):null, h('span',{},ts.length)); };
   if(state.group==='flat'){ for(const t of vis) box.append(item(t)); }
   else if(state.group==='file'){
@@ -928,8 +1144,9 @@ function renderDetail(t){
   d.append(h('div',{class:'crumb'}, [t.file, ...t.path.map(p=>data.bdd&&!/^Feature:/i.test(p)?'Feature: '+p:p)].map(p=>h('span',{},p))),
     h('div',{class:'titlebar'}, h('h3',{},t.title), h('div',{class:'actions'},
       h('button',{class:'btn',onclick:e=>copyText(location.href.split('#')[0]+'#t='+t.id,e.currentTarget,'Link copied')},'Copy link'),
-      (()=>{ const r=t.results[t.results.length-1]; const e=r&&r.errors[0]; return e? h('button',{class:'btn',onclick:ev=>copyText(t.title+'\n'+t.file+':'+t.line+'\n\n'+e.message,ev.currentTarget,'Error copied')},'Copy error') : null; })())),
-    h('div',{class:'badges'}, h('span',{class:'badge '+t.outcome},label[t.outcome]), data.bdd?h('span',{class:'badge scenario'},'Scenario'):null, t.tags.map(g=>h('span',{class:'badge tag'},g)), data.projects.length>1?h('span',{class:'badge tag'},t.project):null, h('span',{class:'loc'}, t.file+':'+t.line+' · '+ms(t.duration))));
+      (()=>{ const r=t.results[t.results.length-1]; const e=r&&r.errors[0]; return e? h('button',{class:'btn',onclick:ev=>copyText(t.title+'\n'+t.file+':'+t.line+'\n\n'+e.message,ev.currentTarget,'Error copied')},'Copy error') : null; })(),
+      editorLink(t))),
+    h('div',{class:'badges'}, h('span',{class:'badge '+t.outcome},label[t.outcome]), sinceBadge(t), dots(t,10), data.bdd?h('span',{class:'badge scenario'},'Scenario'):null, t.tags.map(g=>h('span',{class:'badge tag'},g)), data.projects.length>1?h('span',{class:'badge tag'},t.project):null, h('span',{class:'loc'}, t.file+':'+t.line+' · '+ms(t.duration))));
   const metaKeys=Object.keys(t.meta);
   const linkFor=(k,v)=>{ const tpl=data.options.links[k]||data.options.links['*']; if(tpl) return tpl.replace('{id}',encodeURIComponent(v)); if(/^https?:\/\//.test(v)) return v; return null; };
   if(metaKeys.length) d.append(h('div',{class:'metas'}, metaKeys.map(k=>{ const v=t.meta[k], low=/^(P[3-4]|low|minor|trivial|normal|medium)$/i.test(v), href=linkFor(k,v); return h('span',{class:'meta '+k+(low?' low':'')}, h('span',{class:'k'},k), href? h('a',{href,target:'_blank',rel:'noopener'},v) : h('span',{class:'v'},v)); })));
@@ -940,8 +1157,8 @@ function renderDetail(t){
   }
   const r=t.results[state.retry]; if(!r){ d.append(h('p',{class:'empty'},'This test did not run.')); return; }
   const body=h('div',{});
-  if(r.errors.length){ body.append(h('h4',{},'Error'), ...r.errors.map(e=>h('div',{class:'err'}, e.message, e.stack&&e.stack!==e.message? h('details',{}, h('summary',{},'Stack trace'), h('div',{class:'stack'},e.stack)) : null))); }
-  if(r.steps.length){ body.append(h('h4',{},data.bdd?'Scenario steps':'Steps'), stepTree(r.steps)); }
+  if(r.errors.length){ body.append(h('h4',{},'Error'), ...r.errors.map(errorView)); }
+  if(r.steps.length){ const stepTotal=Math.max(1, r.duration||0, r.steps.reduce((a,x)=>a+x.duration,0)); body.append(h('h4',{},data.bdd?'Scenario steps':'Steps', h('span',{class:'hint'},'bar = share of '+ms(stepTotal))), stepTree(r.steps, stepTotal)); }
   if(r.logs.length){ const t0=r.startTime; body.append(h('h4',{},'Log'), h('div',{class:'logs'}, r.logs.map(l=>h('div',{class:'ln'+(/\b(error|fail|exception)\b/i.test(l.msg)?' err':/\bwarn/i.test(l.msg)?' warn':'')}, h('span',{class:'ts'},'+'+ms(Math.max(0,l.t-t0))), h('span',{class:'lm'},l.msg))))); }
   for(const b of r.data){ body.append(h('h4',{},b.name), dataBlock(b)); }
   if(r.api.length){ body.append(h('h4',{},r.api.length+' API call'+(r.api.length>1?'s':'')), ...r.api.map(apiPanel)); body.append(h('div',{class:'mask-note'},'Secrets and auth headers are masked as ****')); }
@@ -965,17 +1182,17 @@ function renderDetail(t){
   for(const a of texts) body.append(h('h4',{},a.name), h('pre',{class:'txt'},a.text));
   if(r.stdout.length) body.append(h('h4',{},'Console output'), h('pre',{class:'txt'},r.stdout.join('')));
   if(r.stderr.length) body.append(h('h4',{},'Console errors'), h('pre',{class:'txt'},r.stderr.join('')));
-  if(!body.children.length) body.append(h('p',{style:'color:var(--ink-3)'}, r.status==='skipped'?'Skipped — nothing was executed.':'Passed with no steps or attachments recorded.'));
+  if(!body.children.length) body.append(h('p',{style:'color:var(--ink-3)'}, r.status==='skipped'?'Skipped — nothing was executed.'+(skipReason(t)?' Reason: '+skipReason(t):''):'Passed with no steps or attachments recorded.'));
   d.append(body);
 }
-function stepTree(steps){
+function stepTree(steps, total){
   return h('ul',{class:'steps'}, steps.map(s=>{
-    const bad=!!s.error, kids=s.steps.length>0;
+    const bad=!!s.error, kids=s.steps.length>0, pct=total?Math.min(100,s.duration/total*100):0;
     const li=h('li',{class:kids&&!hasError(s)?'collapsed':''});
     const row=h('div',{class:'step'+(bad?' bad':'')},
-      h('span',{class:'tw'}, kids? '▸' : ''), data.bdd?null:h('span',{class:'cat'},s.category), gherkin(s.title), h('span',{class:'d'},ms(s.duration)));
+      h('span',{class:'tw'}, kids? '▸' : ''), data.bdd?null:h('span',{class:'cat'},s.category), gherkin(s.title), total? h('span',{class:'tb',title:Math.round(pct)+'% of the test'}, h('i',{class:pct>=30?'slow':'',style:'width:'+Math.max(pct,s.duration>0?1.5:0)+'%'})) : null, h('span',{class:'d'},ms(s.duration)));
     if(kids){ row.style.cursor='pointer'; row.addEventListener('click',()=>{li.classList.toggle('collapsed'); row.querySelector('.tw').textContent=li.classList.contains('collapsed')?'▸':'▾';}); if(!li.classList.contains('collapsed')) row.querySelector('.tw').textContent='▾'; }
-    li.append(row); if(bad) li.append(h('div',{class:'e'},s.error)); if(kids) li.append(stepTree(s.steps));
+    li.append(row); if(bad) li.append(h('div',{class:'e'},s.error)); if(kids) li.append(stepTree(s.steps, total));
     return li;
   }));
 }
