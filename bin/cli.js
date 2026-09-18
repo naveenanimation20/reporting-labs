@@ -11,10 +11,10 @@ if (cmd === 'init') {
 const config: ReportingLabsOptions = {
   title: 'My app – regression',
   // logo: 'https://example.com/logo.svg',
-  accent: '#2F5BEA',
+  palette: 'lab',            // 'lab' (blue) | 'ocean' | 'ember' | 'mono'
   theme: 'auto',
   metadata: { env: process.env.TEST_ENV ?? 'local', branch: process.env.GIT_BRANCH ?? 'main' },
-  widgets: { runStrip: true, timeline: true, slowest: true, projects: true },
+  links: { story: 'https://acme.atlassian.net/browse/{id}' },
   sections: [],
 };
 export default config;
