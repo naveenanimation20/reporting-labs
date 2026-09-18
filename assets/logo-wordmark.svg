@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 72" width="680" height="144">
+  <defs>
+    <linearGradient id="rl-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1A56DB"/><stop offset="1" stop-color="#0A2A6B"/></linearGradient>
+    <radialGradient id="rl-glow" cx="0.8" cy="0.1" r="0.9"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <clipPath id="rl-flask"><path d="M25 8h14v14l13.5 24.5c1.8 3.3-.6 7.5-4.4 7.5H15.9c-3.8 0-6.2-4.2-4.4-7.5L25 22z"/></clipPath>
+  </defs>
+  <g transform="translate(4 4)">
+    <rect width="64" height="64" rx="15" fill="url(#rl-bg)"/><rect width="64" height="64" rx="15" fill="url(#rl-glow)"/>
+    <g clip-path="url(#rl-flask)">
+      <rect x="17" y="40" width="7" height="20" rx="2" fill="#fff" fill-opacity=".55"/>
+      <rect x="28.5" y="28" width="7" height="32" rx="2" fill="#3DDC8C"/>
+      <rect x="40" y="35" width="7" height="25" rx="2" fill="#fff" fill-opacity=".85"/>
+    </g>
+    <path d="M25 8h14v14l13.5 24.5c1.8 3.3-.6 7.5-4.4 7.5H15.9c-3.8 0-6.2-4.2-4.4-7.5L25 22z" fill="none" stroke="#fff" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M22 8h20" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>
+    <circle cx="24" cy="30" r="2.2" fill="#fff" fill-opacity=".9"/>
+  </g>
+  <text x="86" y="40" font-family="IBM Plex Sans, Segoe UI, Helvetica, Arial, sans-serif" font-size="30" font-weight="600" fill="#0B1F44" letter-spacing="-0.5">reporting<tspan fill="#1A56DB">labs</tspan></text>
+  <text x="87" y="60" font-family="IBM Plex Sans, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#7A8CAB" letter-spacing="1.6">PLAYWRIGHT REPORTS</text>
+</svg>
