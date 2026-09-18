@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/logo-wordmark.svg" alt="reporting-labs" width="360"></p>
+
 # reporting-labs
 
 Beautiful, single-file HTML reports for Playwright. One line of config, zero setup.
