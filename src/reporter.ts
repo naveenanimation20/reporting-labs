@@ -93,7 +93,7 @@ export default class ReportingLabsReporter implements Reporter {
       bdd,
       options: {
         logo: this.options.logo,
-        accent: this.options.accent ?? '#2F5BEA',
+        accent: this.options.accent,
         theme: this.options.theme ?? 'auto',
         palette: this.options.palette ?? 'lab',
         embedFonts: this.options.embedFonts ?? true,

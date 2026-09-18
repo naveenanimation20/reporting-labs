@@ -3,11 +3,11 @@ export interface ReportingLabsOptions {
   title?: string;
   /** Path or data-URI of a logo image. Optional. */
   logo?: string;
-  /** Accent color used for interactive elements. Default: #2F5BEA */
+  /** Override the palette accent with your brand color, e.g. '#7C3AED'. Default: the palette's own accent (royal blue for `lab`). */
   accent?: string;
   /** Color theme. Default: "auto" (follows OS) */
   theme?: 'auto' | 'light' | 'dark';
-  /** Color palette. Default: "lab" (navy + violet). Viewers can switch in the header. */
+  /** Color palette. Default: "lab" (blue + white). Viewers can switch in the header. */
   palette?: 'lab' | 'ocean' | 'ember' | 'mono';
   /** Output folder for the report and copied attachments. Default: "reporting-labs" */
   outputFolder?: string;
@@ -186,7 +186,7 @@ export interface ReportData {
   bdd: boolean;
   options: {
     logo?: string;
-    accent: string;
+    accent?: string;
     theme: 'auto' | 'light' | 'dark';
     palette: 'lab' | 'ocean' | 'ember' | 'mono';
     embedFonts: boolean;

@@ -22,7 +22,7 @@ Run your tests. Open `reporting-labs/index.html`. That's it.
 - Searchable test list with status and project filters.
 - Steps tree, errors with stack traces, screenshots (inline, click to zoom), traces/videos as links, console output, annotations, tags.
 - Retries shown as tabs. Flaky tests flagged.
-- Light and dark theme, follows your OS. Toggle in the header.
+- Blue and white look with light and dark theme, follows your OS. Toggle in the header.
 - Single HTML file – attach it to CI, email it, open it anywhere.
 
 ## Priority, severity, owner, feature
@@ -102,7 +102,7 @@ use: {
 
 ## Look and feel
 
-Four built-in palettes, each with light and dark: `lab` (navy + violet, default), `ocean`, `ember`, `mono`. Set `palette: 'ocean'` in config; viewers can switch from the header and their choice is remembered. `accent: '#hex'` overrides the accent with your brand color. The thin stripe above the header shows the run's pass/flaky/fail proportions.
+Four built-in palettes, each with light and dark: `lab` (blue + white, default), `ocean`, `ember`, `mono`. The header, outcome stripe and view tabs sit on a deep blue band; the overview opens with clickable KPI tiles (pass rate with a ring and the delta from the previous run, then passed / failed / flaky / skipped) that filter the test list. Set `palette: 'ocean'` in config; viewers can switch from the header and their choice is remembered. `accent: '#hex'` overrides the accent with your brand color. The thin stripe above the header shows the run's pass/flaky/fail proportions.
 
 ## Nice to have, built in
 
@@ -118,7 +118,7 @@ Four built-in palettes, each with light and dark: `lab` (navy + violet, default)
 reporter: [['reporting-labs', {
   title: 'ShopLite – nightly regression',
   logo: 'https://example.com/logo.svg',
-  palette: 'lab',                    // 'lab' | 'ocean' | 'ember' | 'mono'
+  palette: 'lab',                    // 'lab' (blue, default) | 'ocean' | 'ember' | 'mono'
   accent: '#7C3AED',                 // optional: override the palette accent with your brand color
   theme: 'auto',                     // 'light' | 'dark' | 'auto'
   outputFolder: 'reporting-labs',
