@@ -1113,7 +1113,7 @@ function trend(){
   svg+='<polyline class="pass" points="'+H.map((e,i)=>x(i)+','+y(rate(e))).join(' ')+'"/>';
   svg+=H.map((e,i)=>'<circle class="pt'+(i===n-1?' now':'')+'" cx="'+x(i)+'" cy="'+y(rate(e))+'" r="3.5"><title>'+new Date(e.time).toLocaleString()+(e.label?' · '+e.label:'')+' · '+rate(e)+'% pass · '+e.failed+' failed · '+ms(e.duration)+'</title></circle>').join('');
   const step=Math.max(1,Math.ceil(n/8));
-  svg+=H.map((e,i)=>(i===n-1||(i%step===0&&n-1-i>=Math.max(1,step/2)))?'<text x="'+x(i)+'" y="'+(HT-6)+'" text-anchor="'+(i===n-1&&n>1?'end':'middle')+'">'+(e.label||new Date(e.time).toLocaleDateString(undefined,{month:'short',day:'numeric'}))+'</text>':'').join('');
+  svg+=H.map((e,i)=>(i===n-1||(i%step===0&&n-1-i>=step))?'<text x="'+x(i)+'" y="'+(HT-6)+'" text-anchor="'+(i===n-1&&n>1?'end':'middle')+'">'+(e.label||new Date(e.time).toLocaleDateString(undefined,{month:'short',day:'numeric'}))+'</text>':'').join('');
   const colW=n>1?(x(1)-x(0)):(W-padL-padR);
   svg+='<line class="guide" x1="0" x2="0" y1="'+padT+'" y2="'+y(0)+'" style="display:none"/>';
   svg+=H.map((e,i)=>'<rect class="hit" data-i="'+i+'" x="'+(x(i)-colW/2)+'" y="0" width="'+colW+'" height="'+HT+'" fill="transparent"/>').join('');
