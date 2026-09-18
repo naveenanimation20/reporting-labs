@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/logo-wordmark.svg" alt="reportingLabs" width="320"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/assets/logo-wordmark.svg" alt="reportingLabs" width="320"></p>
 
 # reportingLabs
 
@@ -8,7 +8,7 @@ reportingLabs turns a test run into a single, self-contained HTML report. No ser
 
 It is runner-agnostic by design: the report is built from a plain JSON model that adapters feed. The **Playwright adapter ships today**; WebdriverIO, Cypress and Jest/Vitest adapters are on the roadmap.
 
-<p align="center"><img src="docs/overview.png" alt="Overview page of a reportingLabs report" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/overview.png" alt="Overview page of a reportingLabs report" width="900"></p>
 
 ## Quick start
 
@@ -46,9 +46,9 @@ That is all. Everything below is optional.
 - **Breakdown**: stacked bars per priority, severity, feature, owner, spec file, project or tag. Click a row to filter the test list. With more than one project you also get a feature × project heatmap.
 - **Slowest tests** and **Got slower** (tests that took 2× longer than last run), **Flakiest tests**, **Skipped** (with reasons), **Environment** and the **Trend** across runs.
 
-<p align="center"><img src="docs/heatmap.png" alt="Breakdown card with the feature by project heatmap" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/heatmap.png" alt="Breakdown card with the feature by project heatmap" width="900"></p>
 
-<p align="center"><img src="docs/trend.png" alt="Trend chart with hover tooltip" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/trend.png" alt="Trend chart with hover tooltip" width="900"></p>
 
 ### Failures: everything you need to triage
 
@@ -57,7 +57,7 @@ That is all. Everything below is optional.
 - **Copy summary**: a Slack/Teams-ready message with top failures, owners, ticket keys and an owner breakdown.
 - The table shows every failed or flaky test with its history over the last runs as dots.
 
-<p align="center"><img src="docs/failures.png" alt="Failures page" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/failures.png" alt="Failures page" width="900"></p>
 
 ### Test detail: the error, the steps, the evidence
 
@@ -67,11 +67,11 @@ That is all. Everything below is optional.
 - Retries as tabs, screenshots inline (click to zoom), videos, traces, console output, logs, test data and API calls.
 - **Open in VS Code** jumps to the failing line.
 
-<p align="center"><img src="docs/test-detail.png" alt="Test detail with expected vs received diff and step bars" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/test-detail.png" alt="Test detail with expected vs received diff and step bars" width="900"></p>
 
 ### Timeline: how the run used its workers
 
-<p align="center"><img src="docs/timeline.png" alt="Timeline by worker" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/timeline.png" alt="Timeline by worker" width="900"></p>
 
 ## Make the report smarter: tag your tests
 
@@ -211,7 +211,7 @@ Two things to set up:
 1. **Publish the report.** Upload `reporting-labs/` as a build artifact (or archive it in Jenkins). Screenshots and fonts are inside `index.html`; videos and large files sit in `reporting-labs/assets/`.
 2. **Keep the history.** `reporting-labs.history.json` is what powers the trend, new vs known failures, flaky history and duration regressions. On GitHub Actions restore and save it with `actions/cache`; on Jenkins the workspace usually persists on its own.
 
-Ready-to-copy samples: [docs/ci/github-actions.yml](docs/ci/github-actions.yml) and [docs/ci/Jenkinsfile](docs/ci/Jenkinsfile).
+Ready-to-copy samples: [docs/ci/github-actions.yml](https://github.com/naveenanimation20/reporting-labs/blob/main/docs/ci/github-actions.yml) and [docs/ci/Jenkinsfile](https://github.com/naveenanimation20/reporting-labs/blob/main/docs/ci/Jenkinsfile).
 
 ```yaml
 # GitHub Actions, the two steps that matter

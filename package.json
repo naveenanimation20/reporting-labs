@@ -34,11 +34,15 @@
   "files": [
     "dist",
     "bin",
-    "README.md"
+    "fonts",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "demo": "npm run build && cd example && npx playwright test; cd .. && echo 'open example/reporting-labs/index.html'"
+    "demo": "npm run build && cd example && npx playwright test; cd .. && echo 'open example/reporting-labs/index.html'",
+    "prepublishOnly": "npm run build",
+    "pack:check": "npm run build && npm pack --dry-run"
   },
   "peerDependencies": {
     "@playwright/test": ">=1.40.0"
@@ -50,5 +54,16 @@
     "@types/node": "^22.0.0",
     "jsdom": "^30.1.0",
     "typescript": "^5.6.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/naveenanimation20/reporting-labs.git"
+  },
+  "homepage": "https://github.com/naveenanimation20/reporting-labs#readme",
+  "bugs": {
+    "url": "https://github.com/naveenanimation20/reporting-labs/issues"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
