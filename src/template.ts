@@ -580,6 +580,7 @@ html,body{-webkit-font-smoothing:antialiased}
 .clu2 .who .sep{color:var(--line-2);margin:0 7px} .clu2 .who .ex{color:var(--ink-3)}
 @media (max-width:640px){.attn2 .ow{display:none} .attn2 .pr{width:72px} .attn2 .pr small{display:none}}
 /* ---------- run status, errors outside tests, snippets ---------- */
+.att-err{padding:12px 14px;background:var(--fail-bg);color:var(--ink);border-radius:8px 8px 0 0;line-height:1.5} .att-err code{font:12px var(--mono);background:var(--surface);padding:1px 5px;border-radius:4px}
 .runbanner{margin-bottom:14px;padding:10px 14px;border-radius:10px;background:var(--flaky-bg);color:var(--flaky-ink);border:1px solid color-mix(in srgb,var(--flaky) 40%,transparent)}
 .note{padding:10px 14px;border-radius:8px;margin-bottom:10px;border:1px solid var(--line)} .note.ok{background:var(--pass-bg);color:var(--ink)} .note.warn{background:var(--flaky-bg);color:var(--flaky-ink)}
 .badge.xfail{background:var(--flaky-bg);color:var(--flaky-ink)}
@@ -1288,7 +1289,9 @@ function renderDetail(t){
   for(const a of imgs){ const m=a.name.match(/^(.*)-(expected|actual|diff)(\.\w+)?$/); if(m){ const set=cmp.get(m[1])||{}; set[m[2]]=a; cmp.set(m[1],set); } }
   const plainImgs=imgs.filter(a=>!/-(expected|actual|diff)(\.\w+)?$/.test(a.name));
   for(const [name,set] of cmp) if(set.expected&&set.actual) body.append(h('h4',{},'Visual comparison · '+name), compare(set)); else for(const k of Object.keys(set)) plainImgs.push(set[k]);
-  if(vids.length){ body.append(h('h4',{},vids.length>1?'Videos':'Video'), h('div',{class:'vids'}, vids.map(a=>h('figure',{}, h('video',{src:a.src,controls:'',preload:'metadata',playsinline:''}), h('figcaption',{}, a.name, a.size?h('span',{},' · '+kb(a.size)):null, ' · ', h('a',{href:a.src,download:''},'download')))))); }
+  if(vids.length){ body.append(h('h4',{},vids.length>1?'Videos':'Video'), h('div',{class:'vids'}, vids.map(a=>{ const fig=h('figure',{}); const v=h('video',{src:a.src,controls:'',preload:'metadata',playsinline:''});
+    v.addEventListener('error',()=>{ const code=v.error&&v.error.code; const why=code===4?'The file is missing, or it is not a format this browser can play.':code===2?'The file could not be read.':'The file could not be decoded.'; v.replaceWith(h('div',{class:'att-err'}, h('b',{},'Video could not be loaded.'), ' '+why+' Expected at ', h('code',{},a.src), '. Note: re-running the tests replaces the assets folder, so a report opened from an earlier run loses its videos.')); });
+    fig.append(v, h('figcaption',{}, a.name, a.size?h('span',{},' · '+kb(a.size)):null, ' · ', h('a',{href:a.src,download:'',target:'_blank',rel:'noopener',title:'Downloads when the report is served over http; opens in a new tab when opened as a file'},'download'))); return fig; }))); }
   if(plainImgs.length){ body.append(h('h4',{},plainImgs.length>1?'Screenshots':'Screenshot'), h('div',{class:'att'}, plainImgs.map(a=>h('figure',{}, h('img',{src:a.src,alt:a.name,loading:'lazy',onclick:()=>lightbox(a.src)}), h('figcaption',{},a.name))))); }
   if(traces.length){ body.append(h('h4',{},'Trace'), h('div',{class:'trace'}, traces.map(a=>h('div',{class:'trace-card'},
     h('div',{}, h('b',{},a.name), a.size?h('span',{style:'color:var(--ink-3)'},' · '+kb(a.size)):null),

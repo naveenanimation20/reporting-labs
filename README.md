@@ -231,7 +231,9 @@ Ready-to-copy samples: [docs/ci/github-actions.yml](https://github.com/naveenani
 
 ## Good to know
 
-- **Single file.** Screenshots and fonts are embedded, so `index.html` works from a mail attachment or a CI artifact. Videos and large files go to `./assets` next to it.
+- **Single file.** Screenshots and fonts are embedded, so `index.html` works from a mail attachment or a CI artifact. Videos and large files go to `./assets` next to it, so keep the folder together when you move or share the report.
+- **Re-running tests replaces the report.** The previous report stays intact until the new run finishes, then `index.html` and `assets/` are replaced. A report tab opened from an earlier run will lose its videos at that point; archive the folder if you need to keep it.
+- **Video download.** Served over http (CI artifact viewer, a local server) the download link saves the file; opened as a plain file the browser opens the video in a new tab instead, where the player's menu offers Save.
 - **Keyboard.** `j` / `k` next and previous test, `f` failed only, `/` search, `1`–`5` switch views, `Esc` close.
 - **Print.** A print stylesheet is included for PDF export.
 - **Themes.** Light and dark follow the OS; the toggle in the header remembers the choice.

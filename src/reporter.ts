@@ -48,11 +48,16 @@ export default class ReportingLabsReporter implements Reporter {
     const base = config.configFile ? path.dirname(config.configFile) : process.cwd();
     this.outDir = path.resolve(base, this.options.outputFolder ?? 'reporting-labs');
     this.assetsDir = path.join(this.outDir, 'assets');
-    fs.rmSync(this.outDir, { recursive: true, force: true });
-    fs.mkdirSync(this.assetsDir, { recursive: true });
+    // The previous report (and its assets) stays intact while the run is in progress;
+    // the folder is refreshed in onEnd, right before the new report is written.
+    fs.mkdirSync(this.outDir, { recursive: true });
   }
 
   async onEnd(result: FullResult) {
+    await this.settleAttachmentFiles();
+    fs.rmSync(this.assetsDir, { recursive: true, force: true });
+    fs.mkdirSync(this.assetsDir, { recursive: true });
+    this.assetCounter = 0;
     const tests: TestData[] = [];
     const projects = new Set<string>();
     let workers = 0;
@@ -169,6 +174,24 @@ export default class ReportingLabsReporter implements Reporter {
   }
 
   // ---- helpers -------------------------------------------------------------
+
+  /** Videos and traces are finalized asynchronously by the runner; wait until every file-backed attachment stops growing. */
+  private async settleAttachmentFiles(): Promise<void> {
+    const paths = new Set<string>();
+    for (const test of this.suite.allTests()) for (const r of test.results) for (const a of r.attachments) if (a.path) paths.add(a.path);
+    const size = (p: string) => { try { return fs.statSync(p).size; } catch { return -1; } };
+    const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+    for (const p of paths) {
+      let last = size(p);
+      for (let i = 0; i < 20; i++) {           // up to ~5 s per file
+        if (last < 0) break;                     // not on disk (yet); nothing to wait for
+        await sleep(250);
+        const now = size(p);
+        if (now === last && now > 0) break;
+        last = now;
+      }
+    }
+  }
 
   /** Runtime facts for the Environment card: Playwright, Node, OS, browsers, CI job, git commit. */
   private collectEnv(base: string): EnvRow[] {
