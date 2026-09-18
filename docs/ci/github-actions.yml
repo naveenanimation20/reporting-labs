@@ -1,0 +1,48 @@
+# Sample GitHub Actions workflow for a project that uses reportingLabs.
+# Copy to .github/workflows/tests.yml in your own repository.
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 2 * * *'   # nightly
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npx playwright install --with-deps
+
+      # Keep the run history between jobs so the report can show trend,
+      # new vs known failures, flaky history and duration regressions.
+      # The key is unique per run so the cache is always saved; restore-keys
+      # picks up the most recent history for this branch.
+      - uses: actions/cache@v4
+        with:
+          path: reporting-labs.history.json
+          key: reporting-labs-history-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            reporting-labs-history-${{ github.ref_name }}-
+
+      - run: npx playwright test
+        env:
+          TEST_ENV: staging
+          # Optional: reportingLabs already labels the run with the GitHub run
+          # number and links the job and commit in the Environment card.
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-report
+          path: reporting-labs/
+          retention-days: 30

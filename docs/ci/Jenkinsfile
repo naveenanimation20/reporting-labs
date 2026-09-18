@@ -1,0 +1,36 @@
+// Sample declarative Jenkins pipeline for a project that uses reportingLabs.
+pipeline {
+  agent any
+  options { timestamps() }
+  stages {
+    stage('Install') {
+      steps {
+        sh 'npm ci'
+        sh 'npx playwright install --with-deps'
+      }
+    }
+    stage('Test') {
+      steps {
+        // The history file lives in the workspace. Jenkins keeps the workspace
+        // between builds on the same agent, so the trend builds up on its own.
+        // If you call cleanWs() or use ephemeral agents, stash/unstash or
+        // archive reporting-labs.history.json and restore it before this step.
+        sh 'npx playwright test'
+      }
+    }
+  }
+  post {
+    always {
+      // Report + assets. reportingLabs labels the run with BUILD_NUMBER and
+      // links this job in the Environment card automatically.
+      archiveArtifacts artifacts: 'reporting-labs/**', allowEmptyArchive: true
+
+      // Optional: show it inside Jenkins with the HTML Publisher plugin.
+      // Jenkins' default Content-Security-Policy blocks the inline JavaScript
+      // that single-file reports rely on, so the page shows up blank until an
+      // admin relaxes it in the script console:
+      //   System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "")
+      // publishHTML(target: [reportDir: 'reporting-labs', reportFiles: 'index.html', reportName: 'Test report', keepAll: true])
+    }
+  }
+}

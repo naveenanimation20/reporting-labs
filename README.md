@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/logo-wordmark.svg" alt="reportingLabs" width="320"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/assets/logo-wordmark.svg" alt="reportingLabs" width="320"></p>
 
 # reportingLabs
 
@@ -8,7 +8,7 @@ reportingLabs turns a test run into a single, self-contained HTML report. No ser
 
 It is runner-agnostic by design: the report is built from a plain JSON model that adapters feed. The **Playwright adapter ships today**; WebdriverIO, Cypress and Jest/Vitest adapters are on the roadmap.
 
-<p align="center"><img src="docs/overview.png" alt="Overview page of a reportingLabs report" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/overview.png" alt="Overview page of a reportingLabs report" width="900"></p>
 
 ## Quick start
 
@@ -46,9 +46,9 @@ That is all. Everything below is optional.
 - **Breakdown**: stacked bars per priority, severity, feature, owner, spec file, project or tag. Click a row to filter the test list. With more than one project you also get a feature × project heatmap.
 - **Slowest tests** and **Got slower** (tests that took 2× longer than last run), **Flakiest tests**, **Skipped** (with reasons), **Environment** and the **Trend** across runs.
 
-<p align="center"><img src="docs/heatmap.png" alt="Breakdown card with the feature by project heatmap" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/heatmap.png" alt="Breakdown card with the feature by project heatmap" width="900"></p>
 
-<p align="center"><img src="docs/trend.png" alt="Trend chart with hover tooltip" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/trend.png" alt="Trend chart with hover tooltip" width="900"></p>
 
 ### Failures: everything you need to triage
 
@@ -57,7 +57,7 @@ That is all. Everything below is optional.
 - **Copy summary**: a Slack/Teams-ready message with top failures, owners, ticket keys and an owner breakdown.
 - The table shows every failed or flaky test with its history over the last runs as dots.
 
-<p align="center"><img src="docs/failures.png" alt="Failures page" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/failures.png" alt="Failures page" width="900"></p>
 
 ### Test detail: the error, the steps, the evidence
 
@@ -67,11 +67,11 @@ That is all. Everything below is optional.
 - Retries as tabs, screenshots inline (click to zoom), videos, traces, console output, logs, test data and API calls.
 - **Open in VS Code** jumps to the failing line.
 
-<p align="center"><img src="docs/test-detail.png" alt="Test detail with expected vs received diff and step bars" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/test-detail.png" alt="Test detail with expected vs received diff and step bars" width="900"></p>
 
 ### Timeline: how the run used its workers
 
-<p align="center"><img src="docs/timeline.png" alt="Timeline by worker" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/timeline.png" alt="Timeline by worker" width="900"></p>
 
 ## Make the report smarter: tag your tests
 
@@ -159,7 +159,7 @@ All options are optional. Pass them as the second element of the reporter tuple.
 | `title` | `'Test report'` | Report title in the header |
 | `logo` | – | Path or data URI of your logo, shown next to the title |
 | `project` | – | `{ name, version, team, url }` shown under the title |
-| `metadata` | `{}` | Key/value chips in the header, e.g. `{ env: 'staging', build: '#1842' }`. `build` (or `branch`) labels the run in history |
+| `metadata` | `{}` | Key/value chips in the header, e.g. `{ env: 'staging', build: '#1842' }`. `build` labels the run in history; in CI the run number is used when it is not set |
 | `env` | – | Extra rows for the Environment card, e.g. `{ 'App build': '2.4.0-rc3' }` |
 | `dimensions` | `['priority','severity','feature','owner']` | Meta keys that get charts and filters |
 | `dimensionOrder` | P0…P4, blocker…trivial | Sort order per dimension, e.g. `{ severity: ['blocker','critical','major','minor'] }` |
@@ -172,7 +172,7 @@ All options are optional. Pass them as the second element of the reporter tuple.
 | `accent` | palette accent | Override the accent with your brand color |
 | `theme` | `'auto'` | `'light'`, `'dark'` or follow the OS |
 | `customCss` | `''` | CSS appended to the report |
-| `editorLinks` | `true` | "Open in VS Code" links |
+| `editorLinks` | `true` locally, `false` in CI | "Open in VS Code" links |
 | `bdd` | auto | Style Given/When/Then steps as Gherkin |
 | `outputFolder` | `'reporting-labs'` | Where the report and copied assets go |
 | `outputFile` | `'index.html'` | Report file name |
@@ -195,6 +195,39 @@ reporter: [['reporting-labs', {
 ```
 
 `npx reporting-labs init` writes a starter `reporting-labs.config.ts`.
+
+## Running in CI
+
+The report is a plain file written next to your tests, so it works anywhere `npx playwright test` runs: locally, GitHub Actions, GitLab, Jenkins, CircleCI, Azure Pipelines, Bitbucket. Nothing phones home and no fonts are fetched, so it also works in locked-down networks.
+
+What happens automatically in CI:
+
+- The Environment card links the CI job and the commit (GitHub Actions, GitLab, Jenkins, CircleCI, Azure, Bitbucket are detected from their environment variables).
+- The run is labelled with the CI run number in the history and the trend chart, unless you set `metadata.build` yourself.
+- "Open in VS Code" links are off when the `CI` variable is set, because they would point at the runner's paths. Set `editorLinks: true` to force them.
+
+Two things to set up:
+
+1. **Publish the report.** Upload `reporting-labs/` as a build artifact (or archive it in Jenkins). Screenshots and fonts are inside `index.html`; videos and large files sit in `reporting-labs/assets/`.
+2. **Keep the history.** `reporting-labs.history.json` is what powers the trend, new vs known failures, flaky history and duration regressions. On GitHub Actions restore and save it with `actions/cache`; on Jenkins the workspace usually persists on its own.
+
+Ready-to-copy samples: [docs/ci/github-actions.yml](https://github.com/naveenanimation20/reporting-labs/blob/main/docs/ci/github-actions.yml) and [docs/ci/Jenkinsfile](https://github.com/naveenanimation20/reporting-labs/blob/main/docs/ci/Jenkinsfile).
+
+```yaml
+# GitHub Actions, the two steps that matter
+- uses: actions/cache@v4
+  with:
+    path: reporting-labs.history.json
+    key: reporting-labs-history-${{ github.ref_name }}-${{ github.run_id }}
+    restore-keys: reporting-labs-history-${{ github.ref_name }}-
+- uses: actions/upload-artifact@v4
+  if: always()
+  with:
+    name: test-report
+    path: reporting-labs/
+```
+
+**Jenkins HTML Publisher note.** Jenkins' default Content-Security-Policy blocks inline JavaScript, so a single-file report shows up blank inside Jenkins (Playwright's own HTML report has the same issue). Either download the archived artifact and open it locally, or have an admin relax the policy in the script console: `System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "")`.
 
 ## Good to know
 

@@ -103,7 +103,7 @@ export default class ReportingLabsReporter implements Reporter {
     const code = (o: Status) => o === 'passed' ? 'p' : o === 'flaky' ? 'k' : o === 'skipped' ? 's' : 'f';
     const perTest: Record<string, [string, number]> = {};
     for (const t of tests) { const last = t.results[t.results.length - 1]; perTest[t.key] = [code(t.outcome), Math.round(last?.duration ?? t.duration)]; }
-    const current: HistoryEntry = { time: this.startTime, duration: result.duration ?? Date.now() - this.startTime, passed: stats.passed, failed: failedCount, flaky: stats.flaky, skipped: stats.skipped, total: stats.total, label: this.options.metadata?.build ?? this.options.metadata?.branch, tests: perTest };
+    const current: HistoryEntry = { time: this.startTime, duration: result.duration ?? Date.now() - this.startTime, passed: stats.passed, failed: failedCount, flaky: stats.flaky, skipped: stats.skipped, total: stats.total, label: this.options.metadata?.build ?? ciRunLabel(process.env) ?? this.options.metadata?.branch, tests: perTest };
     const history = [...entries, current].slice(-(this.options.history?.keep ?? 30));
     if (histOn) { try { fs.writeFileSync(histFile, JSON.stringify(history, null, 1)); } catch { /* read-only fs */ } }
     const bdd = this.options.bdd ?? tests.some(t => t.results.some(r => r.steps.some(st => /^(Given|When|Then|And|But)\b/.test(st.title))));
@@ -156,7 +156,7 @@ export default class ReportingLabsReporter implements Reporter {
         project: this.options.project,
         links: this.options.links ?? {},
         customCss: this.options.customCss ?? '',
-        editorLinks: this.options.editorLinks ?? true,
+        editorLinks: this.options.editorLinks ?? !process.env.CI,
       },
     };
 
@@ -350,6 +350,12 @@ export default class ReportingLabsReporter implements Reporter {
     }
     return null;
   }
+}
+
+/** Run number from the CI system, used to label history entries when metadata.build is not set. */
+function ciRunLabel(env: NodeJS.ProcessEnv): string | undefined {
+  const n = env.GITHUB_RUN_NUMBER || env.BUILD_NUMBER || env.CI_PIPELINE_IID || env.CIRCLE_BUILD_NUM || env.BUILD_BUILDNUMBER || env.BITBUCKET_BUILD_NUMBER;
+  return n ? `#${n}` : undefined;
 }
 
 function ciLink(env: NodeJS.ProcessEnv): { name: string; url?: string } | null {
