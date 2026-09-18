@@ -920,7 +920,7 @@ function editorLink(t){
 function hero(){
   const s=data.stats, failed=s.failed+s.timedOut+s.interrupted, ran=s.total-s.skipped, total=s.total||1;
   const rate=ran?Math.round(s.passed/ran*100):0, ok=failed===0;
-  const parts=[['passed',s.passed,'#fff'],['failed',failed,'rgba(255,120,140,.95)'],['flaky',s.flaky,'#FFC65C'],['skipped',s.skipped,'rgba(255,255,255,.35)']].filter(p=>p[1]>0);
+  const parts=[['passed',s.passed,'#3DDC8C'],['failed',failed,'#FF7A90'],['flaky',s.flaky,'#FFC65C'],['skipped',s.skipped,'rgba(255,255,255,.4)']].filter(p=>p[1]>0);
   const R=34, C=2*Math.PI*R; let off=0, arcs='<circle cx="42" cy="42" r="34" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="9"/>';
   for(const [k,n,c] of parts){ const len=n/total*C; arcs+='<circle cx="42" cy="42" r="34" fill="none" stroke="'+c+'" stroke-width="9" stroke-dasharray="'+Math.max(0,len-2)+' '+(C-Math.max(0,len-2))+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 42 42)"><title>'+label[k]+': '+n+'</title></circle>'; off+=len; }
   const ring=h('div',{class:'ring','aria-hidden':'true',html:'<svg viewBox="0 0 84 84">'+arcs+'<text x="42" y="47" text-anchor="middle">'+rate+'%</text></svg>'});
