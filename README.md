@@ -159,7 +159,7 @@ All options are optional. Pass them as the second element of the reporter tuple.
 | `title` | `'Test report'` | Report title in the header |
 | `logo` | – | Path or data URI of your logo, shown next to the title |
 | `project` | – | `{ name, version, team, url }` shown under the title |
-| `metadata` | `{}` | Key/value chips in the header, e.g. `{ env: 'staging', build: '#1842' }`. `build` (or `branch`) labels the run in history |
+| `metadata` | `{}` | Key/value chips in the header, e.g. `{ env: 'staging', build: '#1842' }`. `build` labels the run in history; in CI the run number is used when it is not set |
 | `env` | – | Extra rows for the Environment card, e.g. `{ 'App build': '2.4.0-rc3' }` |
 | `dimensions` | `['priority','severity','feature','owner']` | Meta keys that get charts and filters |
 | `dimensionOrder` | P0…P4, blocker…trivial | Sort order per dimension, e.g. `{ severity: ['blocker','critical','major','minor'] }` |
@@ -172,7 +172,7 @@ All options are optional. Pass them as the second element of the reporter tuple.
 | `accent` | palette accent | Override the accent with your brand color |
 | `theme` | `'auto'` | `'light'`, `'dark'` or follow the OS |
 | `customCss` | `''` | CSS appended to the report |
-| `editorLinks` | `true` | "Open in VS Code" links |
+| `editorLinks` | `true` locally, `false` in CI | "Open in VS Code" links |
 | `bdd` | auto | Style Given/When/Then steps as Gherkin |
 | `outputFolder` | `'reporting-labs'` | Where the report and copied assets go |
 | `outputFile` | `'index.html'` | Report file name |
@@ -195,6 +195,39 @@ reporter: [['reporting-labs', {
 ```
 
 `npx reporting-labs init` writes a starter `reporting-labs.config.ts`.
+
+## Running in CI
+
+The report is a plain file written next to your tests, so it works anywhere `npx playwright test` runs: locally, GitHub Actions, GitLab, Jenkins, CircleCI, Azure Pipelines, Bitbucket. Nothing phones home and no fonts are fetched, so it also works in locked-down networks.
+
+What happens automatically in CI:
+
+- The Environment card links the CI job and the commit (GitHub Actions, GitLab, Jenkins, CircleCI, Azure, Bitbucket are detected from their environment variables).
+- The run is labelled with the CI run number in the history and the trend chart, unless you set `metadata.build` yourself.
+- "Open in VS Code" links are off when the `CI` variable is set, because they would point at the runner's paths. Set `editorLinks: true` to force them.
+
+Two things to set up:
+
+1. **Publish the report.** Upload `reporting-labs/` as a build artifact (or archive it in Jenkins). Screenshots and fonts are inside `index.html`; videos and large files sit in `reporting-labs/assets/`.
+2. **Keep the history.** `reporting-labs.history.json` is what powers the trend, new vs known failures, flaky history and duration regressions. On GitHub Actions restore and save it with `actions/cache`; on Jenkins the workspace usually persists on its own.
+
+Ready-to-copy samples: [docs/ci/github-actions.yml](docs/ci/github-actions.yml) and [docs/ci/Jenkinsfile](docs/ci/Jenkinsfile).
+
+```yaml
+# GitHub Actions, the two steps that matter
+- uses: actions/cache@v4
+  with:
+    path: reporting-labs.history.json
+    key: reporting-labs-history-${{ github.ref_name }}-${{ github.run_id }}
+    restore-keys: reporting-labs-history-${{ github.ref_name }}-
+- uses: actions/upload-artifact@v4
+  if: always()
+  with:
+    name: test-report
+    path: reporting-labs/
+```
+
+**Jenkins HTML Publisher note.** Jenkins' default Content-Security-Policy blocks inline JavaScript, so a single-file report shows up blank inside Jenkins (Playwright's own HTML report has the same issue). Either download the archived artifact and open it locally, or have an admin relax the policy in the script console: `System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "")`.
 
 ## Good to know
 

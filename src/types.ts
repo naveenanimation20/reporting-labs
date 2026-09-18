@@ -19,7 +19,7 @@ export interface ReportingLabsOptions {
   embedLimit?: number;
   /** Inline videos as base64 too (makes the file big). Default: false – videos are copied to ./assets */
   embedVideos?: boolean;
-  /** Key/value shown in the header (env, branch, build...). */
+  /** Key/value shown in the header (env, branch, build...). `build` labels the run in the history; when it is not set the CI run number is used. */
   metadata?: Record<string, string>;
   /** Extra sections rendered below the summary. HTML is allowed. */
   sections?: Array<{ title: string; html: string }>;
@@ -68,7 +68,7 @@ export interface ReportingLabsOptions {
   history?: { enabled?: boolean; file?: string; keep?: number };
   /** Extra rows for the Environment card, e.g. { 'App version': '2.4.0', 'Test data': 'staging-seed-12' }. Values that are URLs become links. */
   env?: Record<string, string>;
-  /** Show an "Open in VS Code" link on every test (vscode://file/...). Default: true */
+  /** Show an "Open in VS Code" link on every test (vscode://file/...). Default: true locally, false when the CI env var is set. */
   editorLinks?: boolean;
   /** Style Given/When/Then steps as Gherkin and label describe blocks as Features/Scenarios. Default: auto-detect */
   bdd?: boolean;
