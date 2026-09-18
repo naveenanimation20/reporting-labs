@@ -1,11 +1,11 @@
 import type {
-  FullConfig, FullResult, Reporter, Suite, TestCase, TestResult, TestStep,
+  FullConfig, FullResult, Reporter, Suite, TestCase, TestResult, TestStep, TestError,
 } from '@playwright/test/reporter';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { execSync } from 'child_process';
-import { ReportingLabsOptions, ReportData, TestData, ResultData, StepData, AttachmentData, Status, EnvRow } from './types';
+import { ReportingLabsOptions, ReportData, TestData, ResultData, StepData, AttachmentData, Status, EnvRow, ErrorData } from './types';
 import { renderHtml } from './template';
 import { makeMasker, parseCsv } from './mask';
 import type { HistoryEntry } from './types';
@@ -21,6 +21,8 @@ export default class ReportingLabsReporter implements Reporter {
   private assetsDir = '';
   private assetCounter = 0;
   private masker = makeMasker();
+  private globalErrors: ErrorData[] = [];
+  private globalOutput: { stream: 'out' | 'err'; text: string }[] = [];
 
   constructor(options: ReportingLabsOptions = {}) {
     this.options = options;
@@ -28,6 +30,16 @@ export default class ReportingLabsReporter implements Reporter {
   }
 
   printsToStdio() { return false; }
+
+  /** Errors outside tests: a spec that throws at load, global setup, a crashed worker. */
+  onError(error: TestError) { this.globalErrors.push(this.serializeError(error)); }
+  onStdOut(chunk: string | Buffer, test?: TestCase | void) { if (!test) this.pushOutput('out', chunk); }
+  onStdErr(chunk: string | Buffer, test?: TestCase | void) { if (!test) this.pushOutput('err', chunk); }
+  private pushOutput(stream: 'out' | 'err', chunk: string | Buffer) {
+    if (this.globalOutput.length >= 200) return;
+    const text = stripAnsi(chunk.toString()).slice(0, 2000);
+    if (text.trim()) this.globalOutput.push({ stream, text });
+  }
 
   onBegin(config: FullConfig, suite: Suite) {
     this.config = config;
@@ -52,21 +64,30 @@ export default class ReportingLabsReporter implements Reporter {
         workers = Math.max(workers, r.parallelIndex + 1);
         return this.serializeResult(r, test);
       });
-      const outcome = this.outcome(test);
+      const { outcome, expectedFailure, note } = this.outcome(test);
       const titlePath = this.titlePath(test);
-      const file = path.relative(this.config.configFile ? path.dirname(this.config.configFile) : this.config.rootDir, test.location.file).split(path.sep).join('/');
+      const file = this.rel(test.location.file);
+      const last = test.results[test.results.length - 1];
+      const resultAnn = ((last as any)?.annotations ?? []) as { type: string; description?: string }[];
+      const annotations = [...test.annotations, ...resultAnn.filter(a => !test.annotations.some(b => b.type === a.type && b.description === a.description))];
       tests.push({
         id: test.id,
-        key: `${project}::${file}::${[...titlePath, test.title].join(' › ')}`,
+        key: `${project}::${file}::${[...titlePath, test.title].join(' › ')}${test.repeatEachIndex ? ' #' + (test.repeatEachIndex + 1) : ''}`,
         title: test.title,
         path: titlePath,
         file,
         line: test.location.line,
+        column: test.location.column,
         project,
         tags: test.tags,
-        annotations: test.annotations,
+        annotations,
         meta: this.extractMeta(test),
         outcome,
+        expectedFailure,
+        note,
+        expectedStatus: test.expectedStatus,
+        timeout: test.timeout,
+        retries: test.retries,
         duration: results.reduce((a, r) => a + r.duration, 0),
         results,
       });
@@ -101,6 +122,10 @@ export default class ReportingLabsReporter implements Reporter {
       bdd,
       rootDir: base,
       env: this.collectEnv(base),
+      runStatus: result.status,
+      globalErrors: this.globalErrors,
+      globalOutput: this.globalOutput,
+      shard: this.config.shard ? { current: this.config.shard.current, total: this.config.shard.total } : undefined,
       options: {
         logo: this.options.logo,
         accent: this.options.accent,
@@ -156,6 +181,8 @@ export default class ReportingLabsReporter implements Reporter {
     rows.push({ k: 'OS', v: `${os.type()} ${os.release()} (${os.arch()})` });
     const browsers = [...new Set(this.config.projects.map(p => { const u: any = p.use ?? {}; return [u.browserName, u.channel].filter(Boolean).join('/') || (u.defaultBrowserType ?? ''); }).filter(Boolean))];
     if (browsers.length) rows.push({ k: 'Browsers', v: browsers.join(', ') });
+    if (this.config.shard) rows.push({ k: 'Shard', v: `${this.config.shard.current} of ${this.config.shard.total}` });
+    if (this.config.workers) rows.push({ k: 'Workers', v: String(this.config.workers) });
     const ci = ciLink(env);
     if (ci) rows.push({ k: 'CI', v: ci.name, href: ci.url });
     const git = gitInfo(base, env);
@@ -210,15 +237,35 @@ export default class ReportingLabsReporter implements Reporter {
     return meta;
   }
 
-  private outcome(test: TestCase): Status {
+  private rel(file: string): string {
+    const base = this.config.configFile ? path.dirname(this.config.configFile) : this.config.rootDir;
+    return path.relative(base, file).split(path.sep).join('/');
+  }
+
+  private serializeError(e: TestError): ErrorData {
+    const out: ErrorData = { message: stripAnsi(e.message ?? e.value ?? '') };
+    if (e.stack) out.stack = stripAnsi(e.stack);
+    if (e.snippet) out.snippet = stripAnsi(e.snippet);
+    if (e.location) out.location = { file: this.rel(e.location.file), line: e.location.line, column: e.location.column };
+    return out;
+  }
+
+  private outcome(test: TestCase): { outcome: Status; expectedFailure?: boolean; note?: string } {
     const o = test.outcome();
-    if (o === 'expected') return test.results.some(r => r.status === 'skipped') && test.results.length === 1 ? 'skipped' : 'passed';
-    if (o === 'skipped') return 'skipped';
-    if (o === 'flaky') return 'flaky';
     const last = test.results[test.results.length - 1];
-    if (last?.status === 'timedOut') return 'timedOut';
-    if (last?.status === 'interrupted') return 'interrupted';
-    return 'failed';
+    const xfail = test.expectedStatus === 'failed';
+    if (o === 'expected') {
+      if (test.results.some(r => r.status === 'skipped') && test.results.length === 1) return { outcome: 'skipped' };
+      if (xfail) return { outcome: 'passed', expectedFailure: true, note: 'Failed as expected: this test is marked test.fail(). The failure below is the known one.' };
+      return { outcome: 'passed' };
+    }
+    if (o === 'skipped') return { outcome: 'skipped' };
+    if (o === 'flaky') return { outcome: 'flaky' };
+    if (!last) return { outcome: 'interrupted', note: 'This test never ran: the run was interrupted before it started.' };
+    if (last.status === 'timedOut') return { outcome: 'timedOut', note: `Exceeded the ${test.timeout >= 1000 ? (test.timeout / 1000).toFixed(test.timeout % 1000 ? 1 : 0) + 's' : test.timeout + 'ms'} timeout.` };
+    if (last.status === 'interrupted') return { outcome: 'interrupted', note: 'The run was interrupted while this test was executing.' };
+    if (xfail && last.status === 'passed') return { outcome: 'failed', note: 'Passed, but the test is marked test.fail(). If the bug is fixed, remove the marker.' };
+    return { outcome: 'failed' };
   }
 
   private titlePath(test: TestCase): string[] {
@@ -249,11 +296,7 @@ export default class ReportingLabsReporter implements Reporter {
       duration: r.duration,
       startTime: r.startTime.getTime(),
       workerIndex: r.parallelIndex,
-      errors: r.errors.map(e => ({
-        message: stripAnsi(e.message ?? ''),
-        stack: e.stack ? stripAnsi(e.stack) : undefined,
-        snippet: (e as any).snippet ? stripAnsi((e as any).snippet) : undefined,
-      })),
+      errors: r.errors.map(e => this.serializeError(e)),
       steps: r.steps.map(s => this.serializeStep(s)),
       attachments: normal.map(a => this.serializeAttachment(a, test)).filter(Boolean) as AttachmentData[],
       stdout: r.stdout.map(c => stripAnsi(c.toString())),

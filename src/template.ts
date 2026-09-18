@@ -579,6 +579,13 @@ html,body{-webkit-font-smoothing:antialiased}
 .clu2 .who{font-size:12.5px;color:var(--ink-2);margin-top:4px;line-height:1.6} .clu2 .who button{color:var(--accent-2);font-weight:500} .clu2 .who button:hover{text-decoration:underline} .clu2 .who button small{color:var(--ink-3);font-weight:400;font-size:11px}
 .clu2 .who .sep{color:var(--line-2);margin:0 7px} .clu2 .who .ex{color:var(--ink-3)}
 @media (max-width:640px){.attn2 .ow{display:none} .attn2 .pr{width:72px} .attn2 .pr small{display:none}}
+/* ---------- run status, errors outside tests, snippets ---------- */
+.runbanner{margin-bottom:14px;padding:10px 14px;border-radius:10px;background:var(--flaky-bg);color:var(--flaky-ink);border:1px solid color-mix(in srgb,var(--flaky) 40%,transparent)}
+.note{padding:10px 14px;border-radius:8px;margin-bottom:10px;border:1px solid var(--line)} .note.ok{background:var(--pass-bg);color:var(--ink)} .note.warn{background:var(--flaky-bg);color:var(--flaky-ink)}
+.badge.xfail{background:var(--flaky-bg);color:var(--flaky-ink)}
+.errwrap+.errwrap{margin-top:14px}
+.errloc{font-family:var(--mono);color:var(--ink-3);margin-bottom:6px} .errloc a{color:var(--accent-2);text-decoration:none} .errloc a:hover{text-decoration:underline}
+.snip{margin:10px 0 0;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:var(--mono);line-height:1.55;white-space:pre;overflow:auto;color:var(--ink-2)}
 /* ---------- triage extras: history, diff, export, env, heatmap ---------- */
 .kpi .sp{position:absolute;right:14px;top:14px;opacity:.9} .kpi.hero .sp{right:16px;top:14px}
 .kpi .sp svg{display:block}
@@ -752,7 +759,7 @@ function copyText(txt,btn,done){ const ok=()=>{ if(btn){ const o=btn.textContent
 function summaryMarkdown(){
   const s=data.stats, f=s.failed+s.timedOut+s.interrupted, ran=s.total-s.skipped, rate=ran?Math.round(s.passed/ran*100):0;
   const meta=Object.entries(data.metadata).map(([k,v])=>k+': '+v).join(' · ');
-  const lines=['*'+data.title+'* — '+(f?':red_circle:':':large_green_circle:')+' '+rate+'% passed ('+s.passed+'/'+ran+')'+(f?', '+f+' failed'+(PREV.length?' ('+data.tests.filter(t=>isFail(t.outcome)&&sinceInfo(t).kind==='new').length+' new)':''):'')+(s.flaky?', '+s.flaky+' flaky':'')+(s.skipped?', '+s.skipped+' skipped':'')+' · '+ms(data.duration)+(meta?' · '+meta:'')];
+  const lines=['*'+data.title+'* — '+((data.runStatus==='interrupted'||data.runStatus==='timedout')?':warning: run '+data.runStatus+' · ':'')+(f?':red_circle:':':large_green_circle:')+' '+rate+'% passed ('+s.passed+'/'+ran+')'+(f?', '+f+' failed'+(PREV.length?' ('+data.tests.filter(t=>isFail(t.outcome)&&sinceInfo(t).kind==='new').length+' new)':''):'')+(s.flaky?', '+s.flaky+' flaky':'')+(s.skipped?', '+s.skipped+' skipped':'')+' · '+ms(data.duration)+(meta?' · '+meta:'')];
   const bad=data.tests.filter(t=>isFail(t.outcome)).sort((a,b)=>rank(a)-rank(b)).slice(0,10);
   if(bad.length){ lines.push('Failures:'); for(const t of bad) lines.push('• '+[t.meta.priority,t.meta.severity].filter(Boolean).join('/')+(t.meta.priority||t.meta.severity?' ':'')+t.title+(t.meta.owner?' ('+t.meta.owner+')':'')+(t.meta.story?' '+t.meta.story:'')); if(f>bad.length) lines.push('… and '+(f-bad.length)+' more'); }
   const owners=byOwner(); if(owners.length>1||(owners.length===1&&owners[0].owner!=='unassigned')) lines.push('By owner: '+owners.map(o=>o.owner+' '+(o.failed?o.failed:'')+(o.failed&&o.flaky?'+':'')+(o.flaky?o.flaky+' flaky':'')).join(' · '));
@@ -788,7 +795,9 @@ function summary(){
   const parts=[]; if(failed)parts.push(failed+' failed'); if(s.flaky)parts.push(s.flaky+' flaky'); if(s.skipped)parts.push(s.skipped+' skipped');
   const nClu=failureClusters().length;
   const nNew=PREV.length? data.tests.filter(t=>isFail(t.outcome)&&sinceInfo(t).kind==='new').length : null;
-  const el = h('section',{class:'sum'},
+  const notRun=data.tests.filter(t=>!t.results.length||t.outcome==='interrupted').length;
+  const banner=(data.runStatus==='interrupted'||data.runStatus==='timedout')? h('div',{class:'runbanner'}, h('b',{}, data.runStatus==='timedout'?'Global timeout hit.':'Run was interrupted.'), ' '+(notRun?notRun+' test'+(notRun>1?'s':'')+' did not finish, so the numbers below are partial.':'The numbers below may be partial.')) : null;
+  const el = h('section',{class:'sum'}, banner,
     h('div',{class:'kpis'},
       hero(),
       pill('passed','Passed',s.passed,'var(--pass)', ok&&s.passed? 'Every test on first attempt' : 'On first attempt', '', hseries(e=>e.passed)),
@@ -809,6 +818,9 @@ function summary(){
   if(W.skipped!==false) { const sc=skippedCard(); if(sc) g.push(sc); }
   if(W.environment!==false) { const ec=envCard(); if(ec) g.push(ec); }
   if(data.history.length>1) g.push(h('div',{class:'card w12'}, h('h2',{},'Trend', h('span',{class:'hint'},'last '+data.history.length+' runs')), trend()));
+  const ge=data.globalErrors||[], go=data.globalOutput||[];
+  if(ge.length||go.some(x=>x.stream==='err')) g.unshift(h('div',{class:'card w12 fail-rail'}, h('h2',{}, ge.length? ge.length+' error'+(ge.length>1?'s':'')+' outside tests' : 'Output outside tests', h('span',{class:'hint'},'spec files that failed to load, global setup, worker crashes')),
+    ...ge.map(errorView), go.length? h('details',{class:'errfull'}, h('summary',{},'Console output outside tests ('+go.length+' chunks)'), h('pre',{class:'txt'}, go.map(x=>(x.stream==='err'?'[stderr] ':'')+x.text).join(''))) : null));
   if(g.length) el.append(h('div',{class:'grid'}, g));
   for(const sec of data.options.sections) el.append(h('div',{class:'card section'}, h('h2',{},sec.title), h('div',{class:'body',html:sec.html})));
   return el;
@@ -923,7 +935,14 @@ function tokenDiff(a,b){
   const join=(arr,cls)=>{ const out=[]; for(const [t,d] of arr){ const last=out[out.length-1]; if(last&&last.d===d) last.t+=t; else out.push({t,d}); } return out.map(x=>x.d?h('mark',{class:cls},x.t):x.t); };
   return {a:join(A,'del'), b:join(B,'ins')};
 }
-function errorView(e){
+function errorView(e){ return h('div',{class:'errwrap'}, errorWhere(e), errorBody(e), e.snippet? h('pre',{class:'snip'}, e.snippet) : null); }
+function errorWhere(e){
+  if(!e.location) return null;
+  const l=e.location, txt=l.file+':'+l.line+(l.column?':'+l.column:'');
+  const href=vscodeHref(l.file, l.line, l.column);
+  return h('div',{class:'errloc'}, 'at ', href? h('a',{href,title:'Open in VS Code'},txt) : h('span',{},txt));
+}
+function errorBody(e){
   const msg=e.message||'';
   const box=h('div',{class:'err'}, msg, e.stack&&e.stack!==msg? h('details',{}, h('summary',{},'Stack trace'), h('div',{class:'stack'},e.stack)) : null);
   const ex=msg.match(/^(Expected[^:\n]{0,40}):[ \t]*(.+)$/m), rc=msg.match(/^(Received[^:\n]{0,40}):[ \t]*(.+)$/m);
@@ -967,10 +986,14 @@ function heatmap(){
       return h('td',{class:cls,style:c.f?'--a:'+(0.25+ratio*0.75)+';color:'+(ratio>=0.5?'#fff':'var(--fail)'):'',title:c.ts.length+' tests · '+c.f+' failed · '+c.k+' flaky'}, h('button',{onclick:()=>{ state.dims[d]=v; state.project=p; state.status='all'; refresh(); showView('tests'); }}, c.f? h('b',{},c.f+' ✕') : c.k? h('b',{},c.k+' ~') : '✓', h('small',{},'/'+c.ts.length))); }))))),
     h('div',{class:'legend-inline'}, h('span',{style:'--c:var(--pass-bg)'},'all passed'), h('span',{style:'--c:var(--flaky-bg)'},'flaky'), h('span',{style:'--c:var(--fail)'},'failed, darker = higher share'), h('span',{style:'--c:transparent;margin-left:auto'},'click a cell to filter')));
 }
+function vscodeHref(file, line, column){
+  if(data.options.editorLinks===false||!data.rootDir||!file) return null;
+  const root=String(data.rootDir).replace(/\\/g,'/').replace(/\/$/,''); const abs=/^([a-zA-Z]:\/|\/)/.test(file)? file : root+'/'+file;
+  return 'vscode://file'+(abs.startsWith('/')?'':'/')+abs+(line?':'+line+(column?':'+column:''):'');
+}
 function editorLink(t){
-  if(data.options.editorLinks===false||!data.rootDir) return null;
-  const root=String(data.rootDir).replace(/\\/g,'/').replace(/\/$/,''); const abs=root+'/'+t.file;
-  return h('a',{class:'btn',href:'vscode://file'+(abs.startsWith('/')?'':'/')+abs+':'+t.line,title:'Open '+t.file+':'+t.line+' in VS Code'},'Open in VS Code');
+  const href=vscodeHref(t.file, t.line, t.column); if(!href) return null;
+  return h('a',{class:'btn',href,title:'Open '+t.file+':'+t.line+' in VS Code'},'Open in VS Code');
 }
 function hero(){
   const s=data.stats, failed=s.failed+s.timedOut+s.interrupted, ran=s.total-s.skipped, total=s.total||1;
@@ -1199,7 +1222,7 @@ function refresh(){
   document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.g===state.group));
   const item=t=>h('button',{class:'item','data-id':t.id,'aria-current':state.selected===t.id,onclick:()=>select(t.id)},
       h('span',{class:'st '+t.outcome}),
-      h('span',{class:'tt'}, t.path.length?h('div',{class:'p'},t.path.join(' › ')):null, h('div',{class:'n'},t.title), h('div',{class:'d'}, ms(t.duration)+(t.results.length>1?' · '+t.results.length+' attempts':'')+(data.projects.length>1?' · '+t.project:'')+(t.outcome==='skipped'&&skipReason(t)?' · '+skipReason(t):''))));
+      h('span',{class:'tt'}, t.path.length?h('div',{class:'p'},t.path.join(' › ')):null, h('div',{class:'n'},t.title), h('div',{class:'d'}, ms(t.duration)+(t.results.length>1?' · '+t.results.length+' attempts':'')+(data.projects.length>1?' · '+t.project:'')+(t.outcome==='skipped'&&skipReason(t)?' · '+skipReason(t):'')+(t.expectedFailure?' · expected failure':''))));
   const counts=ts=>{ const f=ts.filter(t=>isFail(t.outcome)).length; return h('span',{class:'cnt'}, f?h('b',{},f+' ✕'):null, h('span',{},ts.length)); };
   if(state.group==='flat'){ for(const t of vis) box.append(item(t)); }
   else if(state.group==='file'){
@@ -1238,7 +1261,7 @@ function renderDetail(t){
       h('button',{class:'btn',onclick:e=>copyText(location.href.split('#')[0]+'#t='+t.id,e.currentTarget,'Link copied')},'Copy link'),
       (()=>{ const r=t.results[t.results.length-1]; const e=r&&r.errors[0]; return e? h('button',{class:'btn',onclick:ev=>copyText(t.title+'\n'+t.file+':'+t.line+'\n\n'+e.message,ev.currentTarget,'Error copied')},'Copy error') : null; })(),
       editorLink(t))),
-    h('div',{class:'badges'}, h('span',{class:'badge '+t.outcome},label[t.outcome]), sinceBadge(t), dots(t,10), data.bdd?h('span',{class:'badge scenario'},'Scenario'):null, t.tags.map(g=>h('span',{class:'badge tag'},g)), data.projects.length>1?h('span',{class:'badge tag'},t.project):null, h('span',{class:'loc'}, t.file+':'+t.line+' · '+ms(t.duration))));
+    h('div',{class:'badges'}, h('span',{class:'badge '+t.outcome},label[t.outcome]), t.expectedFailure? h('span',{class:'badge xfail',title:'Marked test.fail(): failing is the expected result'},'Expected failure') : null, sinceBadge(t), dots(t,10), data.bdd?h('span',{class:'badge scenario'},'Scenario'):null, t.tags.map(g=>h('span',{class:'badge tag'},g)), data.projects.length>1?h('span',{class:'badge tag'},t.project):null, h('span',{class:'loc'}, t.file+':'+t.line+' · '+ms(t.duration)+(t.outcome==='timedOut'&&t.timeout?' · timeout '+ms(t.timeout):'')+(t.retries?' · retries '+t.retries:''))));
   const metaKeys=Object.keys(t.meta);
   const linkFor=(k,v)=>{ const tpl=data.options.links[k]||data.options.links['*']; if(tpl) return tpl.replace('{id}',encodeURIComponent(v)); if(/^https?:\/\//.test(v)) return v; return null; };
   if(metaKeys.length) d.append(h('div',{class:'metas'}, metaKeys.map(k=>{ const v=t.meta[k], low=/^(P[3-4]|low|minor|trivial|normal|medium)$/i.test(v), href=linkFor(k,v); return h('span',{class:'meta '+k+(low?' low':'')}, h('span',{class:'k'},k), href? h('a',{href,target:'_blank',rel:'noopener'},v) : h('span',{class:'v'},v)); })));
@@ -1249,7 +1272,8 @@ function renderDetail(t){
   }
   const r=t.results[state.retry]; if(!r){ d.append(h('p',{class:'empty'},'This test did not run.')); return; }
   const body=h('div',{});
-  if(r.errors.length){ body.append(h('h4',{},'Error'), ...r.errors.map(errorView)); }
+  if(t.note&&state.retry===t.results.length-1) body.append(h('div',{class:'note '+(t.outcome==='passed'?'ok':'warn')}, t.note));
+  if(r.errors.length){ body.append(h('h4',{},r.errors.length>1?'Errors':'Error'), ...r.errors.map(errorView)); }
   if(r.steps.length){ const stepTotal=Math.max(1, r.duration||0, r.steps.reduce((a,x)=>a+x.duration,0)); body.append(h('h4',{},data.bdd?'Scenario steps':'Steps', h('span',{class:'hint'},'bar = share of '+ms(stepTotal))), stepTree(r.steps, stepTotal)); }
   if(r.logs.length){ const t0=r.startTime; body.append(h('h4',{},'Log'), h('div',{class:'logs'}, r.logs.map(l=>h('div',{class:'ln'+(/\b(error|fail|exception)\b/i.test(l.msg)?' err':/\bwarn/i.test(l.msg)?' warn':'')}, h('span',{class:'ts'},'+'+ms(Math.max(0,l.t-t0))), h('span',{class:'lm'},l.msg))))); }
   for(const b of r.data){ body.append(h('h4',{},b.name), dataBlock(b)); }

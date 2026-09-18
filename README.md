@@ -106,6 +106,15 @@ Failure clusters, Needs attention, and a By owner card that groups failures per 
 - Heatmap: with more than one project, the Breakdown card gains a feature × project grid. Red cells mean failures (darker = larger share), amber flaky, green clean. Click a cell to filter.
 - Skipped card lists skipped tests with the reason from `test.skip(cond, 'reason')` / `test.fixme`, and the reason also shows in the test list.
 
+## Everything Playwright knows, in the report
+
+- Outcomes: passed, failed, flaky (passed on retry), skipped (with the `test.skip` / `test.fixme` reason), timed out (with the timeout that was exceeded) and interrupted.
+- `test.fail()` tests that fail as expected count as passed and carry an "Expected failure" badge; one that unexpectedly passes is reported as failed with a note telling you to remove the marker.
+- Every error shows its location (linked to VS Code), Playwright's code snippet, the message and the stack. Multiple errors per attempt are all listed.
+- Errors outside tests (a spec that throws at load, global setup, a worker crash) get their own card at the top of the overview, together with any console output that was not attributed to a test.
+- Interrupted runs (Ctrl+C) and global timeouts show a banner with how many tests did not finish, and the copied summary is flagged.
+- Shard (`--shard=2/4`) and worker count appear in the Environment card. Result-level annotations are merged with the test's own.
+
 ## Inside a test
 
 - Expected vs received diff: `expect` failures render side by side with the differing characters highlighted, and `- Expected / + Received` object diffs are colored line by line. The full message and stack stay one click away.
