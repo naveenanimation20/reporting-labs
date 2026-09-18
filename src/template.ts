@@ -510,7 +510,11 @@ html,body{-webkit-font-smoothing:antialiased}
 .slow .bar i{position:absolute;inset:0;width:var(--w);background:var(--accent);border-radius:999px}
 .slow button:hover .t{color:var(--accent-2)}
 .trend .grid line{stroke-dasharray:2 4} .trend text{font-size:11px}
-.trend .area{fill:var(--pass);opacity:.12} .trend .dur{fill:var(--accent);opacity:.14}
+.trend{position:relative} .trend .area{fill:var(--pass);opacity:.12;pointer-events:none} .trend .dur{fill:var(--accent);opacity:.14} .trend .hit{cursor:crosshair} .trend .hit:hover{fill:var(--accent);fill-opacity:.06} .trend .guide{stroke:var(--accent);stroke-width:1;stroke-dasharray:3 3;pointer-events:none}
+.ttip{position:absolute;z-index:6;min-width:200px;max-width:240px;background:var(--surface);border:1px solid var(--line-2);border-radius:10px;box-shadow:0 10px 30px -10px rgba(11,31,68,.35);padding:10px 12px;font-size:12.5px;pointer-events:none}
+.ttip .tt-h{font-weight:600;display:flex;justify-content:space-between;gap:10px;align-items:baseline} .ttip .tt-h span{font:11px var(--mono);color:var(--ink-3);font-weight:400}
+.ttip .tt-big{font-size:20px;font-weight:600;margin:4px 0 6px;font-variant-numeric:tabular-nums} .ttip .tt-big small{font-size:11.5px;font-weight:400;color:var(--ink-3)}
+.ttip .tt-row{display:flex;align-items:center;gap:8px;padding:2px 0;color:var(--ink-2)} .ttip .tt-row i{width:8px;height:8px;border-radius:2px;flex:none} .ttip .tt-row b{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--ink)}
 .trend .pass{stroke-width:2.2} .trend .pt.now{r:4.5}
 .trend-cap{font-size:12px;gap:16px}
 .section .body code{font:12.5px var(--mono);background:var(--accent-tint);color:var(--accent-2);padding:1px 6px;border-radius:5px}
@@ -1023,8 +1027,32 @@ function trend(){
   svg+=H.map((e,i)=>'<circle class="pt'+(i===n-1?' now':'')+'" cx="'+x(i)+'" cy="'+y(rate(e))+'" r="3.5"><title>'+new Date(e.time).toLocaleString()+(e.label?' · '+e.label:'')+' · '+rate(e)+'% pass · '+e.failed+' failed · '+ms(e.duration)+'</title></circle>').join('');
   const step=Math.max(1,Math.ceil(n/8));
   svg+=H.map((e,i)=>(i===n-1||(i%step===0&&n-1-i>=Math.max(1,step/2)))?'<text x="'+x(i)+'" y="'+(HT-6)+'" text-anchor="'+(i===n-1&&n>1?'end':'middle')+'">'+(e.label||new Date(e.time).toLocaleDateString(undefined,{month:'short',day:'numeric'}))+'</text>':'').join('');
-  return h('div',{class:'trend'}, h('div',{html:'<svg viewBox="0 0 '+W+' '+HT+'">'+svg+'</svg>'}).firstChild,
+  const colW=n>1?(x(1)-x(0)):(W-padL-padR);
+  svg+='<line class="guide" x1="0" x2="0" y1="'+padT+'" y2="'+y(0)+'" style="display:none"/>';
+  svg+=H.map((e,i)=>'<rect class="hit" data-i="'+i+'" x="'+(x(i)-colW/2)+'" y="0" width="'+colW+'" height="'+HT+'" fill="transparent"/>').join('');
+  const svgEl=h('div',{html:'<svg viewBox="0 0 '+W+' '+HT+'">'+svg+'</svg>'}).firstChild;
+  const tip=h('div',{class:'ttip'}); tip.hidden=true;
+  const wrap=h('div',{class:'trend'}, svgEl, tip);
+  const guide=svgEl.querySelector('.guide');
+  const show=(i,ev)=>{ const e=H[i], ran=e.total-e.skipped, prev=H[i-1];
+    const d=prev? rate(e)-rate(prev) : null;
+    tip.innerHTML='<div class="tt-h">'+escape(e.label||'Run '+(i+1))+'<span>'+escape(new Date(e.time).toLocaleString())+'</span></div>'
+      +'<div class="tt-big">'+rate(e)+'% <small>pass rate'+(d==null?'':d===0?' · same as previous':' · '+(d>0?'+':'')+d+' pts vs previous')+'</small></div>'
+      +'<div class="tt-row"><i style="background:var(--pass)"></i>Passed<b>'+e.passed+'</b></div>'
+      +'<div class="tt-row"><i style="background:var(--fail)"></i>Failed<b>'+e.failed+'</b></div>'
+      +(e.flaky?'<div class="tt-row"><i style="background:var(--flaky)"></i>Flaky<b>'+e.flaky+'</b></div>':'')
+      +(e.skipped?'<div class="tt-row"><i style="background:var(--skip)"></i>Skipped<b>'+e.skipped+'</b></div>':'')
+      +'<div class="tt-row"><i style="background:var(--accent)"></i>Duration<b>'+ms(e.duration)+'</b></div>'
+      +'<div class="tt-row"><i style="background:transparent"></i>Total<b>'+e.total+'</b></div>';
+    tip.hidden=false; guide.style.display=''; guide.setAttribute('x1',x(i)); guide.setAttribute('x2',x(i));
+    const box=wrap.getBoundingClientRect(); let lx=ev.clientX-box.left+14, ly=ev.clientY-box.top+14;
+    if(lx+240>box.width) lx=Math.max(0,ev.clientX-box.left-254); if(ly+170>box.height) ly=Math.max(0,ly-190);
+    tip.style.left=lx+'px'; tip.style.top=ly+'px'; };
+  svgEl.addEventListener('mousemove',ev=>{ const r=ev.target.closest&&ev.target.closest('.hit'); if(!r){ tip.hidden=true; guide.style.display='none'; return; } show(+r.dataset.i,ev); });
+  svgEl.addEventListener('mouseleave',()=>{ tip.hidden=true; guide.style.display='none'; });
+  wrap.append(
     h('div',{class:'trend-cap'}, h('span',{style:'color:var(--pass)'},'— pass rate'), h('span',{style:'color:var(--fail)'},'- - fail rate'), h('span',{style:'color:var(--accent)'},'▮ duration'), h('span',{style:'margin-left:auto'}, 'this run: '+rate(H[n-1])+'% · '+ms(H[n-1].duration))));
+  return wrap;
 }
 function workers(){
   const lanes=[]; for(let i=0;i<data.workers;i++) lanes.push({i,tests:0,fail:0,ms:0});
