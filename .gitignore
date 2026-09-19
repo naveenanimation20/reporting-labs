@@ -7,3 +7,4 @@ examples/reporting-labs
 examples/test-results
 examples/reporting-labs.history.json
 examples/package-lock.json
+*.tgz

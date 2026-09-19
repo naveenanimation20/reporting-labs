@@ -24,3 +24,18 @@ open reporting-labs/index.html
 ```
 
 Run the suite two or three times to see the history features (new vs known failures, flaky dots, got slower, trend).
+
+### Trying a change that is not on npm yet
+
+`npm install` above pulls the published `reporting-labs` from npm. To run the examples against the code in this clone, build and pack it first, then install the tarball into `examples/` without touching its package.json:
+
+```bash
+cd reporting-labs
+npm install && npm run build && npm pack          # writes reporting-labs-<version>.tgz
+cd examples
+npm install
+npm install --no-save ../reporting-labs-*.tgz
+npx playwright test
+```
+
+Do not use `npm link` or `npm install ..` here: a symlinked package resolves `@playwright/test` from the repo root, Playwright then sees two copies and fails with "did not expect test.beforeAll() to be called here".
