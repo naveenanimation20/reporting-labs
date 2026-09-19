@@ -382,6 +382,7 @@ li.collapsed>ul{display:none}
 .folder .cnt{margin-left:auto;display:flex;gap:6px} .folder .cnt b{color:var(--fail)} .folder .cnt span{color:var(--ink-3)}
 .folder .tw{font-size:9px;color:var(--ink-3)}
 .folder+.folder,.folder+.file{margin-left:0}
+.suite{display:flex;align-items:center;gap:6px;padding:7px 12px 3px;font-size:12px;color:var(--ink-2)} .suite .sn{font-weight:500;color:var(--ink)} .suite .tw{font-size:9px;color:var(--ink-3)} .suite .cnt{margin-left:auto;display:flex;gap:6px} .suite .cnt b{color:var(--fail)} .suite .cnt span{color:var(--ink-3)}
 .tree-indent{padding-left:14px;border-left:1px solid var(--line);margin-left:16px}
 .file-row{display:flex;align-items:center;gap:6px;padding:6px 12px 2px;font:12px var(--mono);color:var(--ink-3);width:100%;text-align:left}
 .file-row .mini{display:flex;gap:2px;margin-left:auto} .file-row .mini i{width:6px;height:6px;border-radius:50%;display:block}
@@ -1222,14 +1223,27 @@ function refresh(){
   const box=$('#items'); box.innerHTML='';
   if(!vis.length){ box.append(h('div',{class:'empty'},'No tests match. Clear the search or pick another filter.')); return; }
   document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.g===state.group));
-  const item=t=>h('button',{class:'item','data-id':t.id,'aria-current':state.selected===t.id,onclick:()=>select(t.id)},
+  const item=(t,inGroup)=>h('button',{class:'item','data-id':t.id,'aria-current':state.selected===t.id,onclick:()=>select(t.id)},
       h('span',{class:'st '+t.outcome}),
-      h('span',{class:'tt'}, t.path.length?h('div',{class:'p'},t.path.join(' › ')):null, h('div',{class:'n'},t.title), h('div',{class:'d'}, ms(t.duration)+(t.results.length>1?' · '+t.results.length+' attempts':'')+(data.projects.length>1?' · '+t.project:'')+(t.outcome==='skipped'&&skipReason(t)?' · '+skipReason(t):'')+(t.expectedFailure?' · expected failure':''))));
+      h('span',{class:'tt'}, t.path.length&&!inGroup?h('div',{class:'p'},t.path.join(' › ')):null, h('div',{class:'n'},t.title), h('div',{class:'d'}, ms(t.duration)+(t.results.length>1?' · '+t.results.length+' attempts':'')+(data.projects.length>1?' · '+t.project:'')+(t.outcome==='skipped'&&skipReason(t)?' · '+skipReason(t):'')+(t.expectedFailure?' · expected failure':''))));
   const counts=ts=>{ const f=ts.filter(t=>isFail(t.outcome)).length; return h('span',{class:'cnt'}, f?h('b',{},f+' ✕'):null, h('span',{},ts.length)); };
+  // describe blocks: a header per level, tests indented under it
+  const grouped=(ts,indent)=>{
+    const out=[]; let last=[];
+    for(const t of ts){
+      const p=t.path; let i=0; while(i<p.length && i<last.length && p[i]===last[i]) i++;
+      for(let d=i; d<p.length; d++){
+        const inSuite=ts.filter(x=>x.path.length>d && p.slice(0,d+1).every((seg,k)=>x.path[k]===seg));
+        out.push(h('div',{class:'suite',style:'padding-left:'+(indent+d*14)+'px'}, h('span',{class:'tw'},'▾'), h('span',{class:'sn'},p[d]), counts(inSuite)));
+      }
+      const el=item(t,true); el.style.paddingLeft=(indent+p.length*14)+'px'; out.push(el); last=p;
+    }
+    return out;
+  };
   if(state.group==='flat'){ for(const t of vis) box.append(item(t)); }
   else if(state.group==='file'){
-    let lastFile=null;
-    for(const t of vis){ if(t.file!==lastFile){ box.append(h('div',{class:'file'},t.file)); lastFile=t.file; } box.append(item(t)); }
+    const byF=new Map(); for(const t of vis){ if(!byF.has(t.file)) byF.set(t.file,[]); byF.get(t.file).push(t); }
+    for(const [f,ts] of byF){ box.append(h('div',{class:'file'},f)); for(const el of grouped(ts,12)) box.append(el); }
   } else {
     // folder tree
     const root={dirs:new Map(),files:new Map()};
@@ -1242,7 +1256,7 @@ function refresh(){
         if(open) out.push(...render(child,key,depth+1)); }
       for(const [name,ts] of [...node.files.entries()].sort()){ const key=path+name; const open=state.open[key]!==false;
         out.push(h('button',{class:'file-row',style:'padding-left:'+(12+depth*14)+'px',onclick:()=>{state.open[key]=!open;refresh();}}, h('span',{class:'tw'},open?'▾':'▸'), name, h('span',{class:'mini'}, ts.map(t=>h('i',{style:'background:'+colorOf(bucket(t))})))));
-        if(open) for(const t of ts){ const el=item(t); el.style.paddingLeft=(24+depth*14)+'px'; out.push(el); } }
+        if(open) out.push(...grouped(ts,24+depth*14)); }
       return out;
     };
     for(const el of render(root,'',0)) box.append(el);
@@ -1299,7 +1313,7 @@ function renderDetail(t){
     h('div',{class:'trace-how'}, 'Open with ', h('code',{},'npx playwright show-trace '+a.src), ' or drop the file on ', h('a',{href:'https://trace.playwright.dev',target:'_blank',rel:'noopener'},'trace.playwright.dev')),
     h('a',{class:'dl',href:a.src,download:''},'Download trace'))))); }
   if(files.length){ body.append(h('h4',{},'Files'), h('div',{class:'att'}, files.map(a=>h('figure',{}, h('div',{class:'file'}, h('a',{href:a.src,download:''},a.name), h('div',{style:'font-size:11px;color:var(--ink-3)'},a.contentType+(a.size?' · '+kb(a.size):''))))))); }
-  for(const a of texts) body.append(h('h4',{},a.name), h('pre',{class:'txt'},a.text));
+  for(const a of texts){ if(/^error-context/i.test(a.name)) body.append(h('details',{class:'errfull'}, h('summary',{},'Error context (written by Playwright for AI tools)'), h('pre',{class:'txt'},a.text))); else body.append(h('h4',{},a.name), h('pre',{class:'txt'},a.text)); }
   const conLines=(arr,forceErr)=>arr.join('').split('\n').filter(x=>x.trim()).map(x=>h('div',{class:'ln'+(forceErr||/\b(error|fail|exception)\b/i.test(x)?' err':/\bwarn/i.test(x)?' warn':'')}, h('span',{class:'lm'},x)));
   if(r.stdout.length) body.append(h('h4',{},'Console output', h('span',{class:'hint'},'console.log in this test')), h('div',{class:'logs plain'}, conLines(r.stdout,false)));
   if(r.stderr.length) body.append(h('h4',{},'Console errors', h('span',{class:'hint'},'console.error in this test')), h('div',{class:'logs plain'}, conLines(r.stderr,true)));
