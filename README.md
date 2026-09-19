@@ -2,15 +2,15 @@
 
 # reportingLabs
 
-**One HTML file that tells you what broke, who owns it, and whether it is new.**
+**A beautiful test report in one HTML file. It tells you what broke, who owns it, and whether it is new.**
 
-reportingLabs turns a test run into a single, self-contained HTML report. No server, no upload, no dashboard to log into. Open the file, or attach it to a CI job, an email or a Slack message.
+reportingLabs turns a test run into a single HTML file. No server. No upload. No login. Open the file in a browser, attach it to a CI job, or send it on Slack or email. It just works.
 
-It is runner-agnostic by design: the report is built from a plain JSON model that adapters feed. The **Playwright adapter ships today**; WebdriverIO, Cypress and Jest/Vitest adapters are on the roadmap.
+Today it ships with a **Playwright** reporter. WebdriverIO, Cypress and Jest/Vitest are on the roadmap.
 
 <p align="center"><img src="https://raw.githubusercontent.com/naveenautomationlabs/reporting-labs/main/docs/overview.png" alt="Overview page of a reportingLabs report" width="900"></p>
 
-## Quick start
+## Quick start (2 minutes)
 
 **1. Install**
 
@@ -18,46 +18,15 @@ It is runner-agnostic by design: the report is built from a plain JSON model tha
 npm i -D reporting-labs
 ```
 
-**2. Add the reporter to `playwright.config.ts`**
-
-```ts
-export default defineConfig({
-  reporter: [['reporting-labs', { title: 'My app – regression' }]],
-});
-```
-
-**3. Run your tests and open the report**
+**2. Create the config file**
 
 ```bash
-npx playwright test
-open reporting-labs/index.html
+npx reporting-labs init
 ```
 
-That is all. Everything below is optional.
+This creates `reporting-labs.config.ts` next to your `playwright.config.ts`. Every option is in there with a short comment. Most lines are commented out. Uncomment what you want, delete what you do not need.
 
-## Keep the reporter options in their own file (recommended)
-
-As soon as you set more than a title, put the reportingLabs options in a separate file. Your `playwright.config.ts` stays short, and all report settings live in one place.
-
-**Step 1.** Run `npx reporting-labs init`. It writes `reporting-labs.config.ts` with every option listed and explained in comments, most of them commented out. Keep what you need, delete the rest. A trimmed-down version looks like this:
-
-```ts
-// reporting-labs.config.ts  (next to playwright.config.ts)
-import 'reporting-labs/auto';   // records every request.* / page.request call in the report
-import type { ReportingLabsOptions } from 'reporting-labs';
-
-const config: ReportingLabsOptions = {
-  title: 'My app – regression',
-  outputFolder: 'reports/reporting-labs',
-  embedVideos: true,
-  metadata: { env: process.env.TEST_ENV ?? 'local' },
-  // links: { story: 'https://yourteam.atlassian.net/browse/{id}' },
-};
-
-export default config;
-```
-
-**Step 2.** Import it in `playwright.config.ts` and add one line to your reporter list. Your other reporters keep working as before.
+**3. Add the reporter to `playwright.config.ts`**
 
 ```ts
 import { defineConfig } from '@playwright/test';
@@ -66,35 +35,104 @@ import reportingLabs from './reporting-labs.config';
 export default defineConfig({
   reporter: [
     ['list'],
-    ['html', { open: 'never' }],
-    ['reporting-labs', reportingLabs],   // <- this line
+    ['reporting-labs', reportingLabs],   // <- add this line
   ],
 });
 ```
 
-That is it. The `ReportingLabsOptions` type gives you autocomplete for every option in your editor.
+Your other reporters (list, html, blob...) keep working as before.
 
-If your reporter list differs between CI and local (a common pattern), add the same line to both branches:
+**4. Run tests and open the report**
+
+```bash
+npx playwright test
+open reporting-labs/index.html
+```
+
+Done. Everything below is optional.
+
+> **In a hurry?** Skip the config file and pass options inline: `reporter: [['reporting-labs', { title: 'My app' }]]`.
+
+## Add details to your tests (3 small helpers)
+
+The report already shows steps, screenshots, videos, traces and errors on its own. Three small helpers add the rest. Import them from `reporting-labs` and call them inside a test.
+
+### `meta()`: who owns this test and how important it is
 
 ```ts
-reporter: process.env.CI
-  ? [['blob'], ['html', { open: 'never' }], ['reporting-labs', reportingLabs]]
-  : [['list'], ['html', { open: 'never' }], ['reporting-labs', reportingLabs]],
+import { meta } from 'reporting-labs';
+
+test('completes purchase', async ({ page }) => {
+  meta({ priority: 'P0', severity: 'blocker', owner: 'naveen', feature: 'payment', epic: 'EPIC-18', story: 'SHOP-250' });
+  // ... your test as usual
+});
+```
+
+One line per test. With this the report can rank failures by priority, group them by owner or feature, and link to your Jira stories.
+
+- Known keys: `priority`, `severity`, `owner`, `feature`, `epic`, `story`, `issue`, `component`, `team`. Any other key you pass is shown too.
+- Your Playwright tags like `@sanity` or `@regression` stay as they are and still show on the test.
+- To make story and epic keys clickable, set `links` in the config: `links: { story: 'https://yourteam.atlassian.net/browse/{id}' }`.
+
+### `log()`: a line in the report
+
+```ts
+import { log } from 'reporting-labs';
+
+await log('cart is empty, adding 2 items');
+await log('order id', orderId);          // extra values are appended
+```
+
+Each line gets a timestamp. Lines with "error" or "fail" show in red, "warn" in amber.
+
+### `testData()`: show the data the test used
+
+```ts
+import { testData } from 'reporting-labs';
+
+await testData({ user: 'naveen@x.com', password: 'S3cret' }, 'Login');    // object → key/value block
+await testData(rowsFromExcelOrJson, 'Coupons');                           // array of objects → table
+await testData(fs.readFileSync('data/users.csv', 'utf8'), 'users.csv');   // CSV text → table
+```
+
+**Secrets are masked automatically.** Passwords, tokens, API keys, `Authorization` and `Cookie` headers, JWTs and `Bearer ...` values show as `****`. Add your own keys with `maskKeys: ['otp', 'pan']` in the config.
+
+## API calls: recorded on their own
+
+Nothing to add to your tests. The config file created by `init` starts with `import 'reporting-labs/auto'`, and that is the switch. From then on every call made with Playwright's `request` fixture or `page.request` is recorded as it happens.
+
+```ts
+test('creates an order', async ({ request }) => {
+  const res = await request.post('/v1/orders', { headers, data });   // recorded, nothing else to do
+  expect(res.status()).toBe(201);
+});
+```
+
+Each call shows in the test detail and in the **API** tab with method, URL, status, time, headers, request body and response body. A **Copy as cURL** button lets you replay it from a terminal. Failed calls (4xx, 5xx, no connection) are highlighted.
+
+If you do not use the config file, add `import 'reporting-labs/auto'` at the top of `playwright.config.ts` instead.
+
+Only calls that do not go through Playwright (Node `fetch`, axios, a Java service) need a manual record:
+
+```ts
+import { api } from 'reporting-labs';
+
+await api({ method: 'GET', url, status: res.status, duration, responseBody: await res.json() });
 ```
 
 ## Examples you can copy
 
-The [`examples/`](https://github.com/naveenautomationlabs/reporting-labs/tree/main/examples) folder has one small spec per feature. Each one runs in a few seconds (only the API example goes online, to the free [gorest.in](https://gorest.in/) API), so you can read it, run it, and copy what you need.
+The [`examples/`](https://github.com/naveenautomationlabs/reporting-labs/tree/main/examples) folder has one small spec per feature. Read it, run it, copy what you need.
 
 | Spec | What it shows |
 |---|---|
-| [01-tag-your-tests.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/01-tag-your-tests.spec.ts) | `meta()` with priority, severity, owner, feature, story; the same via tags and annotations |
+| [01-tag-your-tests.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/01-tag-your-tests.spec.ts) | `meta()` with priority, severity, owner, feature, epic, story |
 | [02-logs-and-test-data.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/02-logs-and-test-data.spec.ts) | `log()` lines and `testData()` as key/value, table and CSV, with secrets masked |
-| [03-api-calls.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/03-api-calls.spec.ts) | Plain `request.post` / `patch` / `delete` and `page.request` calls against gorest.in, recorded automatically, a 403 in the API tab, `api()` for other clients |
-| [04-steps-and-attachments.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/04-steps-and-attachments.spec.ts) | `test.step()` bars, screenshot / JSON attachments, visual comparison viewer |
+| [03-api-calls.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/03-api-calls.spec.ts) | Plain `request.post` / `patch` / `delete` and `page.request` calls to the public [gorest.in](https://gorest.in/) API, recorded on their own; a 403; `api()` for other clients |
+| [04-steps-and-attachments.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/04-steps-and-attachments.spec.ts) | `test.step()` bars, screenshot and JSON attachments, visual comparison viewer |
 | [05-outcomes.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/05-outcomes.spec.ts) | skip with a reason, fixme, expected failure, timeout, a plain failure, a flaky test |
-| [06-bdd-style.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/06-bdd-style.spec.ts) | Given / When / Then steps rendered as Gherkin |
-| [reporting-labs.config.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/reporting-labs.config.ts) | A complete reporter config, every option commented |
+| [06-bdd-style.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/06-bdd-style.spec.ts) | Given / When / Then steps shown as Gherkin |
+| [reporting-labs.config.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/reporting-labs.config.ts) | A complete config with comments |
 | [playwright.config.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/playwright.config.ts) | How the reporter sits next to the built-in reporters |
 
 ```bash
@@ -103,16 +141,18 @@ cd reporting-labs/examples && npm install && npx playwright test
 open reporting-labs/index.html
 ```
 
+Run it two or three times to see the history features (new vs known failures, flaky dots, got slower, trend).
+
 ## A tour of the report
 
-### Overview: the state of the run in one screen
+### Overview: the whole run on one screen
 
-- **Tiles**: pass rate with a ring and the change from the previous run, then passed / failed / flaky / skipped. Click a tile to see those tests.
-- **Run strip**: every test as one cell, in run order. Hover for the name, click to open.
-- **Needs attention**: failures ranked by priority and severity, with the spec file, the owner, and whether the failure is new or has been failing since a given build.
-- **Failure clusters**: failures grouped by error message, so 30 red tests with one root cause read as one problem.
-- **Breakdown**: stacked bars per priority, severity, feature, owner, spec file, project or tag. Click a row to filter the test list. With more than one project you also get a feature × project heatmap.
-- **Slowest tests** and **Got slower** (tests that took 2× longer than last run), **Flakiest tests**, **Skipped** (with reasons), **Environment** and the **Trend** across runs.
+- **Tiles**: pass rate with a ring and the change from the last run, then passed / failed / flaky / skipped. Click a tile to see those tests.
+- **Run strip**: every test as one small cell, in run order. Hover for the name, click to open.
+- **Needs attention**: failures sorted by priority and severity, with the spec file, the owner, and whether the failure is new or has been failing for a while.
+- **Failure clusters**: failures grouped by error message. 30 red tests with one cause read as one problem.
+- **Breakdown**: bars per priority, severity, feature, owner, spec file, project or tag. Click a row to filter the test list. With more than one project you also get a feature × project heatmap.
+- **Slowest tests**, **Got slower** (2× slower than last run), **Flakiest tests**, **Skipped** (with reasons), **Environment** and the **Trend** across runs.
 
 <p align="center"><img src="https://raw.githubusercontent.com/naveenautomationlabs/reporting-labs/main/docs/heatmap.png" alt="Breakdown card with the feature by project heatmap" width="900"></p>
 
@@ -121,19 +161,18 @@ open reporting-labs/index.html
 ### Failures: everything you need to triage
 
 - **By owner**: who to ping, with failed and flaky counts. Click an owner to filter.
-- **Download CSV / JSON**: the failed and flaky tests with title, spec, project, priority, owner, ticket, attempts, duration, first error line and new/known status. Ready for Jira or a sheet.
-- **Copy summary**: a Slack/Teams-ready message with top failures, owners, ticket keys and an owner breakdown.
-- The table shows every failed or flaky test with its history over the last runs as dots.
+- **Download CSV / JSON**: all failed and flaky tests with title, spec, project, priority, owner, ticket, attempts, duration, first error line and new/known status. Ready for Jira or a sheet.
+- **Copy summary**: a Slack or Teams message with the top failures, owners and ticket keys.
+- The table shows every failed or flaky test with its last runs as dots.
 
 <p align="center"><img src="https://raw.githubusercontent.com/naveenautomationlabs/reporting-labs/main/docs/failures.png" alt="Failures page" width="900"></p>
 
-### Test detail: the error, the steps, the evidence
+### Test detail: the error, the steps, the proof
 
-- **Expected vs received** side by side with the difference highlighted. Object diffs are colored line by line.
-- Error **location** (linked to VS Code), Playwright's **code snippet**, full message and stack.
+- **Expected vs received** side by side with the difference highlighted.
+- Error **location** (opens in VS Code), Playwright's **code snippet**, full message and stack.
 - **Steps** with a bar per step showing its share of the test time. Given/When/Then titles are styled as Gherkin.
-- Retries as tabs, screenshots inline (click to zoom), videos, traces, console output, logs, test data and API calls.
-- **Open in VS Code** jumps to the failing line.
+- Retries as tabs. Screenshots inline (click to zoom), videos, traces, console output, logs, test data and API calls.
 
 <p align="center"><img src="https://raw.githubusercontent.com/naveenautomationlabs/reporting-labs/main/docs/test-detail.png" alt="Test detail with expected vs received diff and step bars" width="900"></p>
 
@@ -141,159 +180,97 @@ open reporting-labs/index.html
 
 <p align="center"><img src="https://raw.githubusercontent.com/naveenautomationlabs/reporting-labs/main/docs/timeline.png" alt="Timeline by worker" width="900"></p>
 
-## Make the report smarter: describe your tests with meta()
-
-One line per test gives you priority ranking, owner rollups, feature breakdowns and Jira links. Your Playwright tags like `@sanity` or `@regression` stay as they are and still show on the test.
-
-```ts
-import { meta } from 'reporting-labs';
-
-test('completes purchase', async ({ page }) => {
-  meta({ priority: 'P0', severity: 'blocker', owner: 'naveen', feature: 'payment', epic: 'EPIC-18', story: 'SHOP-250' });
-  // ...
-});
-```
-
-`priority`, `severity`, `owner`, `feature`, `epic`, `story`, `issue`, `component`, `team` are known out of the box. Anything else you pass is shown too.
-
-Full example: [examples/01-tag-your-tests.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/01-tag-your-tests.spec.ts).
-
-Turn story, epic or issue keys into links:
-
-```ts
-links: { story: 'https://acme.atlassian.net/browse/{id}', epic: 'https://acme.atlassian.net/browse/{id}' }
-```
-
-## Logs and test data
-
-```ts
-import { log, testData } from 'reporting-labs';
-
-test('creates an order', async ({ request }) => {
-  await log('starting with an empty cart');                                 // timestamped log line
-
-  await testData({ user: 'naveen@x.com', password: 'S3cret' }, 'Login');    // object → key/value block
-  await testData(rowsFromExcelOrJson, 'Coupons');                           // array of objects → table
-  await testData(fs.readFileSync('data/users.csv', 'utf8'), 'users.csv');   // CSV string → table
-});
-```
-
-## API calls, recorded automatically
-
-If you use `reporting-labs.config.ts` from the section above, this is already switched on: the file starts with `import 'reporting-labs/auto'`. Otherwise add that one line to `playwright.config.ts`.
-
-Every call your tests make through Playwright's `request` fixture, `page.request`, `context.request` or `playwright.request.newContext()` is recorded as it happens. No wrapper, no helper, your test code stays plain Playwright:
-
-```ts
-test('creates an order', async ({ request }) => {
-  const res = await request.post('/v1/orders', { headers, data });
-  expect(res.status()).toBe(201);
-});
-```
-
-Each call shows up in the test detail and in the **API** tab with method, URL, status, time taken, request and response headers and bodies, and a **Copy as cURL** button so you can replay it from a terminal. Failed calls (4xx / 5xx, or no connection) are highlighted. Binary responses are summarised instead of dumped, and bodies over 200 KB are truncated.
-
-Calls that do not go through Playwright (axios, `fetch`, a Java service in the same pipeline) can still be recorded by hand with `api({ method, url, status, duration, requestBody, responseBody })`.
-
-Full examples: [02-logs-and-test-data.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/02-logs-and-test-data.spec.ts) and [03-api-calls.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/03-api-calls.spec.ts). Passwords, tokens, API keys, `Authorization` / `Cookie` headers, JWTs and `Bearer …` values are masked as `****` everywhere. Add your own keys with `maskKeys: ['otp', 'pan']`.
-
 ## Run history: new vs known, flaky, slower
 
-The reporter keeps `reporting-labs.history.json` next to your config (last 30 runs by default). Commit it, or cache it in CI, and the report starts answering the questions you ask first:
+The reporter keeps a small file, `reporting-labs.history.json`, next to your config. It remembers the last 30 runs. Commit it, or cache it in CI, and the report starts answering the questions you ask first:
 
 | Question | Where it shows |
 |---|---|
-| Did this break just now, or has it been red for days? | `new this run` / `failing since #1838` on every failure; the Failed tile splits the count |
+| Did this break just now, or has it been red for days? | `new this run` or `failing since #1838` on every failure |
 | Which tests are flaky? | Last-10-runs dots on every failure, plus the Flakiest tests card |
-| What got slower? | Got slower tab on the Slowest card (2× slower than last run) |
-| Are we trending up or down? | Trend chart with pass rate, fail rate and duration per run, hover for details |
+| What got slower? | Got slower tab on the Slowest card |
+| Are we getting better or worse? | Trend chart with pass rate, fail rate and duration per run |
 
-The first run has nothing to compare with; these cards fill in from the second run.
+The first run has nothing to compare with. These cards fill in from the second run.
 
 ## Screenshots, videos, traces
 
-Nothing extra to do. Use your runner's own settings and the report picks the attachments up:
+Nothing extra to do. Use Playwright's own settings and the report picks them up:
 
 ```ts
 use: {
   screenshot: 'only-on-failure',   // shown inline, click to zoom
-  video: 'retain-on-failure',      // inline player (copied to ./assets, or embedded with embedVideos: true)
+  video: 'retain-on-failure',      // inline player
   trace: 'on-first-retry',         // trace card with download and how to open it
 }
 ```
 
-`toHaveScreenshot` failures get a visual comparison viewer: slider, side by side, and diff. Anything you attach with `test.info().attach()` shows up too: images inline, text/JSON as a code block, everything else as a download.
+`toHaveScreenshot` failures get a visual comparison viewer: slider, side by side, and diff. Anything you attach with `test.info().attach()` shows up too: images inline, JSON and CSV as a table or key/value block, text as a code block, everything else as a download.
 
 ## What the report covers
 
-Every outcome Playwright can produce is shown, not just pass/fail:
+Every outcome Playwright can produce, not just pass and fail:
 
-- passed, failed, flaky (passed on retry), skipped with the `test.skip` / `test.fixme` reason, timed out with the exceeded timeout, interrupted
-- `test.fail()` tests that fail as expected count as passed with an "Expected failure" badge; one that unexpectedly passes is reported as failed with a note
-- errors outside tests (a spec that throws at load, global setup, a worker crash) get their own card at the top of the overview
-- interrupted runs and global timeouts show a banner with how many tests did not finish
-- shard and worker count in the Environment card, together with Playwright and Node versions, OS, browsers, the CI job link (GitHub Actions, GitLab, Jenkins, CircleCI, Azure, Bitbucket) and the git commit
+- passed, failed, flaky (passed on retry), skipped with the `test.skip` / `test.fixme` reason, timed out, interrupted
+- `test.fail()` tests that fail as expected count as passed with an "Expected failure" badge
+- errors outside tests (a spec that throws at load, global setup, a worker crash) get their own card at the top
+- interrupted runs show a banner with how many tests did not finish
+- the Environment card shows Playwright and Node versions, OS, browsers, workers, shard, the CI job link and the git commit
 
-## Options
+## All options
 
-All options are optional. Pass them as the second element of the reporter tuple.
+Every option is optional. `npx reporting-labs init` writes them all, with comments, into `reporting-labs.config.ts` (`--js` for JavaScript, `--force` to overwrite).
 
 | Option | Default | What it does |
 |---|---|---|
-| `title` | `'Test report'` | Report title in the header |
-| `logo` | – | Path or data URI of your logo, shown next to the title |
+| `title` | `'Test report'` | Title in the header |
+| `logo` | – | Path, URL or data URI of your logo |
 | `project` | – | `{ name, version, team, url }` shown under the title |
-| `metadata` | `{}` | Key/value chips in the header, e.g. `{ env: 'staging', build: '#1842' }`. `build` labels the run in history; in CI the run number is used when it is not set |
-| `env` | – | Extra rows for the Environment card, e.g. `{ 'App build': '2.4.0-rc3' }` |
+| `metadata` | `{}` | Chips in the header, e.g. `{ env: 'staging', build: '#1842' }`. `build` labels the run in the trend; in CI the run number is used when it is not set |
+| `env` | – | Extra rows on the Environment card |
+| `links` | `{}` | Turn meta keys into links. `{id}` is replaced by the value |
+| `maskKeys` | `[]` | Extra keys to mask as `****` |
 | `dimensions` | `['priority','severity','feature','owner']` | Meta keys that get charts and filters |
-| `dimensionOrder` | P0…P4, blocker…trivial | Sort order per dimension, e.g. `{ severity: ['blocker','critical','major','minor'] }` |
-| `links` | `{}` | URL templates per meta key, `{id}` is replaced by the value |
-| `maskKeys` | `[]` | Extra keys to mask in logs, data and API panels |
-| `widgets` | all on | Hide cards: `{ tags: false, timeline: false, flaky: false, environment: false, skipped: false, ... }` |
-| `sections` | `[]` | Extra HTML sections below the summary, e.g. release notes |
+| `dimensionOrder` | P0…P4, blocker…trivial | Sort order per dimension |
+| `widgets` | all on | Hide cards: `{ tags: false, timeline: false, ... }` |
+| `sections` | `[]` | Extra HTML below the summary, e.g. release notes |
 | `history` | `{ enabled: true, keep: 30 }` | Run history file; `file` sets a custom path |
-| `palette` | `'lab'` | `'lab'` (blue), `'ocean'`, `'ember'`, `'mono'`. Viewers can switch in the header |
-| `accent` | palette accent | Override the accent with your brand color |
+| `palette` | `'lab'` | `'lab'` (blue), `'ocean'`, `'ember'`, `'mono'` |
+| `accent` | palette accent | Your brand color |
 | `theme` | `'auto'` | `'light'`, `'dark'` or follow the OS |
 | `customCss` | `''` | CSS appended to the report |
-| `editorLinks` | `true` locally, `false` in CI | "Open in VS Code" links |
+| `editorLinks` | on locally, off in CI | "Open in VS Code" links |
 | `bdd` | auto | Style Given/When/Then steps as Gherkin |
-| `outputFolder` | `'reporting-labs'` | Where the report and copied assets go |
+| `outputFolder` | `'reporting-labs'` | Where the report goes |
 | `outputFile` | `'index.html'` | Report file name |
-| `embedAttachments` | `true` | Inline screenshots as base64 (single file) |
-| `embedLimit` | 2 MB | Larger attachments are copied to `./assets` instead |
-| `embedVideos` | `false` | Inline videos too (big file) |
-| `embedFonts` | `true` | Bundle IBM Plex (~140 KB) so the report looks the same offline |
+| `embedAttachments` | `true` | Screenshots inside the HTML (one file) |
+| `embedLimit` | 2 MB | Bigger attachments are copied to `./assets` |
+| `embedVideos` | `false` | Videos inside the HTML too (bigger file, no folder issues) |
+| `embedFonts` | `true` | Bundle the fonts (~140 KB) so it looks the same offline |
 | `announce` | `true` | Print the report path after the run |
 
-A fuller example:
+If your reporter list differs between CI and local, add the same line to both:
 
 ```ts
-reporter: [['reporting-labs', {
-  title: 'ShopLite – nightly regression',
-  project: { name: 'ShopLite Web', version: '2.4.0', team: 'QA Platform' },
-  metadata: { env: 'staging', branch: process.env.GIT_BRANCH ?? 'main', build: process.env.BUILD_ID ?? 'local' },
-  links: { story: 'https://acme.atlassian.net/browse/{id}' },
-  sections: [{ title: 'Release notes', html: '<p>Checkout v2 at 50% rollout.</p>' }],
-}]]
+reporter: process.env.CI
+  ? [['blob'], ['reporting-labs', reportingLabs]]
+  : [['list'], ['reporting-labs', reportingLabs]],
 ```
-
-`npx reporting-labs init` writes `reporting-labs.config.ts` with all of these options commented (`--js` for a JavaScript file, `--force` to overwrite); see [Keep the reporter options in their own file](#keep-the-reporter-options-in-their-own-file-recommended).
 
 ## Running in CI
 
-The report is a plain file written next to your tests, so it works anywhere `npx playwright test` runs: locally, GitHub Actions, GitLab, Jenkins, CircleCI, Azure Pipelines, Bitbucket. Nothing phones home and no fonts are fetched, so it also works in locked-down networks.
+The report is a plain file written next to your tests. It works anywhere `npx playwright test` runs: GitHub Actions, GitLab, Jenkins, CircleCI, Azure Pipelines, Bitbucket, your laptop. Nothing is sent anywhere and no fonts are fetched, so it also works on locked-down networks.
 
-What happens automatically in CI:
+What happens on its own in CI:
 
-- The Environment card links the CI job and the commit (GitHub Actions, GitLab, Jenkins, CircleCI, Azure, Bitbucket are detected from their environment variables).
-- The run is labelled with the CI run number in the history and the trend chart, unless you set `metadata.build` yourself.
-- "Open in VS Code" links are off when the `CI` variable is set, because they would point at the runner's paths. Set `editorLinks: true` to force them.
+- The Environment card links the CI job and the commit.
+- The run is labelled with the CI run number in the history and the trend, unless you set `metadata.build`.
+- "Open in VS Code" links are off, because they would point at the runner's paths.
 
 Two things to set up:
 
-1. **Publish the report.** Upload `reporting-labs/` as a build artifact (or archive it in Jenkins). Screenshots and fonts are inside `index.html`; videos and large files sit in `reporting-labs/assets/`.
-2. **Keep the history.** `reporting-labs.history.json` is what powers the trend, new vs known failures, flaky history and duration regressions. On GitHub Actions restore and save it with `actions/cache`; on Jenkins the workspace usually persists on its own.
+1. **Publish the report.** Upload the `reporting-labs/` folder as a build artifact (or archive it in Jenkins). Videos and large files sit in `reporting-labs/assets/`, so keep the folder together.
+2. **Keep the history.** `reporting-labs.history.json` powers the trend and the new vs known failures. On GitHub Actions save it with `actions/cache`. On Jenkins the workspace usually keeps it on its own.
 
 Ready-to-copy samples: [docs/ci/github-actions.yml](https://github.com/naveenautomationlabs/reporting-labs/blob/main/docs/ci/github-actions.yml) and [docs/ci/Jenkinsfile](https://github.com/naveenautomationlabs/reporting-labs/blob/main/docs/ci/Jenkinsfile).
 
@@ -311,23 +288,22 @@ Ready-to-copy samples: [docs/ci/github-actions.yml](https://github.com/naveenaut
     path: reporting-labs/
 ```
 
-**Jenkins HTML Publisher note.** Jenkins' default Content-Security-Policy blocks inline JavaScript, so a single-file report shows up blank inside Jenkins (Playwright's own HTML report has the same issue). Either download the archived artifact and open it locally, or have an admin relax the policy in the script console: `System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "")`.
+**Jenkins note.** Jenkins blocks inline JavaScript by default, so a single-file report shows up blank inside the Jenkins HTML Publisher (Playwright's own HTML report has the same issue). Download the archived artifact and open it locally, or ask an admin to relax the policy in the script console: `System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "")`.
 
 ## Good to know
 
-- **Single file.** Screenshots and fonts are embedded, so `index.html` works from a mail attachment or a CI artifact. Videos and large files go to `./assets` next to it, so keep the folder together when you move or share the report.
-- **Re-running tests replaces the report.** The previous report stays intact until the new run finishes, then `index.html` and `assets/` are replaced. A report tab opened from an earlier run will lose its videos at that point; archive the folder if you need to keep it.
-- **Videos on macOS.** If the report lives in Downloads, Desktop or Documents and you open it as a file, Chrome may be blocked from reading the sibling `assets/` files (the player shows a clear message). Allow Chrome under System Settings → Privacy & Security → Files and Folders, move the project elsewhere, or set `embedVideos: true` to put videos inside the HTML.
-- **Video download.** Served over http (CI artifact viewer, a local server) the download link saves the file; opened as a plain file the browser opens the video in a new tab instead, where the player's menu offers Save.
+- **One file.** Screenshots and fonts are inside `index.html`, so it works from an email or a CI artifact. Videos and large files go to `./assets` next to it. Keep the folder together when you share it.
+- **Each run replaces the report.** The old report stays until the new run finishes. Archive the folder if you want to keep an old one.
+- **Videos on macOS.** If the report is in Downloads, Desktop or Documents and you open it as a file, Chrome may not be allowed to read the `assets/` folder (the player shows a clear message). Allow Chrome under System Settings → Privacy & Security → Files and Folders, move the project elsewhere, or set `embedVideos: true`.
 - **Keyboard.** `j` / `k` next and previous test, `f` failed only, `/` search, `1`–`5` switch views, `Esc` close.
-- **Print.** A print stylesheet is included for PDF export.
-- **Themes.** Light and dark follow the OS; the toggle in the header remembers the choice.
+- **Print.** A print stylesheet is included, so "Save as PDF" works.
+- **Themes.** Light and dark follow the OS. The toggle in the header remembers your choice.
 
 ## Roadmap
 
-- WebdriverIO, Cypress, Jest/Vitest, JUnit XML adapters via the shared JSON schema
-- AI summary and failure clustering (bring your own API key)
-- Hosted history dashboard across branches/projects
+- WebdriverIO, Cypress, Jest/Vitest and JUnit XML adapters
+- AI summary of failures (bring your own API key)
+- Hosted history dashboard across branches and projects
 
 ## License
 
