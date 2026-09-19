@@ -4,7 +4,7 @@ Small, self-contained spec files that show every reportingLabs feature. They use
 
 | File | Shows |
 |---|---|
-| [01-tag-your-tests.spec.ts](01-tag-your-tests.spec.ts) | `meta()` for priority, severity, owner, feature, story; the same via tags and annotations |
+| [01-tag-your-tests.spec.ts](01-tag-your-tests.spec.ts) | `meta()` with priority, severity, owner, feature, epic, story |
 | [02-logs-and-test-data.spec.ts](02-logs-and-test-data.spec.ts) | `log()` lines, `testData()` as key/value, table and CSV; secrets masked |
 | [03-api-calls.spec.ts](03-api-calls.spec.ts) | Plain `request.post` / `patch` / `delete` and `page.request` calls against gorest.in, recorded automatically; a 403; `api()` for other clients |
 | [04-steps-and-attachments.spec.ts](04-steps-and-attachments.spec.ts) | `test.step()` bars, screenshots, JSON and text attachments, visual comparison |
