@@ -2,3 +2,8 @@ node_modules
 dist
 example/reporting-labs
 example/test-results
+examples/node_modules
+examples/reporting-labs
+examples/test-results
+examples/reporting-labs.history.json
+examples/package-lock.json
