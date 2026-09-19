@@ -392,7 +392,7 @@ li.collapsed>ul{display:none}
 .logs{background:var(--surface-2);border-radius:var(--radius);padding:8px 0;font:12px/1.55 var(--mono);max-height:320px;overflow:auto}
 .logs .ln{display:grid;grid-template-columns:78px 1fr;gap:12px;padding:1px 12px}
 .logs .ln:hover{background:var(--surface)} .logs .ts{color:var(--ink-3)} .logs .lm{white-space:pre-wrap;word-break:break-word}
-.logs .ln.err .lm{color:var(--fail)} .logs .ln.warn .lm{color:#9A6A00}
+.logs .ln.err .lm{color:var(--fail)} .logs .ln.warn .lm{color:#9A6A00} .logs.plain .ln{grid-template-columns:1fr}
 /* data tables */
 .tbl-wrap{overflow:auto;border:1px solid var(--line);border-radius:var(--radius);max-height:360px}
 table.tbl{border-collapse:collapse;font-size:12.5px;width:100%;min-width:100%}
@@ -1267,7 +1267,7 @@ function renderDetail(t){
   const metaKeys=Object.keys(t.meta);
   const linkFor=(k,v)=>{ const tpl=data.options.links[k]||data.options.links['*']; if(tpl) return tpl.replace('{id}',encodeURIComponent(v)); if(/^https?:\/\//.test(v)) return v; return null; };
   if(metaKeys.length) d.append(h('div',{class:'metas'}, metaKeys.map(k=>{ const v=t.meta[k], low=/^(P[3-4]|low|minor|trivial|normal|medium)$/i.test(v), href=linkFor(k,v); return h('span',{class:'meta '+k+(low?' low':'')}, h('span',{class:'k'},k), href? h('a',{href,target:'_blank',rel:'noopener'},v) : h('span',{class:'v'},v)); })));
-  const otherAnn=t.annotations.filter(a=>!DIMS.includes(a.type.toLowerCase()));
+  const otherAnn=t.annotations.filter(a=>!DIMS.includes(a.type.toLowerCase()) && !(a.type.toLowerCase() in t.meta));
   if(otherAnn.length) d.append(h('h4',{},'Annotations'), h('dl',{class:'kv'}, otherAnn.map(a=>[h('dt',{},a.type),h('dd',{},a.description||'')])));
   if(t.results.length>1){
     d.append(h('div',{class:'tabs'}, t.results.map((r,i)=>h('button',{class:'tab','aria-selected':state.retry===i,onclick:()=>{state.retry=i;renderDetail(t);}}, (i===0?'Attempt 1':'Retry '+i)+' · '+(label[r.status]||r.status)))));
@@ -1300,8 +1300,9 @@ function renderDetail(t){
     h('a',{class:'dl',href:a.src,download:''},'Download trace'))))); }
   if(files.length){ body.append(h('h4',{},'Files'), h('div',{class:'att'}, files.map(a=>h('figure',{}, h('div',{class:'file'}, h('a',{href:a.src,download:''},a.name), h('div',{style:'font-size:11px;color:var(--ink-3)'},a.contentType+(a.size?' · '+kb(a.size):''))))))); }
   for(const a of texts) body.append(h('h4',{},a.name), h('pre',{class:'txt'},a.text));
-  if(r.stdout.length) body.append(h('h4',{},'Console output'), h('pre',{class:'txt'},r.stdout.join('')));
-  if(r.stderr.length) body.append(h('h4',{},'Console errors'), h('pre',{class:'txt'},r.stderr.join('')));
+  const conLines=(arr,forceErr)=>arr.join('').split('\n').filter(x=>x.trim()).map(x=>h('div',{class:'ln'+(forceErr||/\b(error|fail|exception)\b/i.test(x)?' err':/\bwarn/i.test(x)?' warn':'')}, h('span',{class:'lm'},x)));
+  if(r.stdout.length) body.append(h('h4',{},'Console output', h('span',{class:'hint'},'console.log in this test')), h('div',{class:'logs plain'}, conLines(r.stdout,false)));
+  if(r.stderr.length) body.append(h('h4',{},'Console errors', h('span',{class:'hint'},'console.error in this test')), h('div',{class:'logs plain'}, conLines(r.stderr,true)));
   if(!body.children.length) body.append(h('p',{style:'color:var(--ink-3)'}, r.status==='skipped'?'Skipped — nothing was executed.'+(skipReason(t)?' Reason: '+skipReason(t):''):'Passed with no steps or attachments recorded.'));
   d.append(body);
 }

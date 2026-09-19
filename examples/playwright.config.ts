@@ -1,4 +1,3 @@
-import 'reporting-labs/auto';             // records every request.* / page.request call in the report
 import { defineConfig } from '@playwright/test';
 import reportingLabs from './reporting-labs.config';
 

@@ -21,16 +21,18 @@ test.describe('Checkout', () => {
   });
 });
 
-// The same information can come from tags...
-test('search suggests products', { tag: ['@P1', '@severity:major', '@owner:priya', '@feature:search'] }, async ({ page }) => {
+test('search suggests products', async ({ page }) => {
+  meta({ priority: 'P1', severity: 'major', owner: 'priya', feature: 'search', story: 'SHOP-188' });
+
   await page.setContent('<input id="q"><ul id="s"></ul><script>q.oninput=()=>s.innerHTML="<li>macbook pro</li>"</script>');
   await page.fill('#q', 'mac');
   await expect(page.locator('#s li')).toHaveText('macbook pro');
 });
 
-// ...or from plain Playwright annotations.
-test('shows empty cart message', async ({ page }) => {
-  test.info().annotations.push({ type: 'priority', description: 'P3' }, { type: 'owner', description: 'amit' }, { type: 'feature', description: 'cart' });
+// Your own Playwright tags keep working next to meta(); the report shows them on the test.
+test('shows empty cart message', { tag: ['@sanity'] }, async ({ page }) => {
+  meta({ priority: 'P3', severity: 'minor', owner: 'amit', feature: 'cart' });
+
   await page.setContent('<p id="cart">Your cart is empty</p>');
   await expect(page.locator('#cart')).toContainText('empty');
 });
