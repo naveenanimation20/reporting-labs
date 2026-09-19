@@ -16,7 +16,7 @@ Small, self-contained spec files that show every reportingLabs feature. They use
 ## Run them
 
 ```bash
-git clone https://github.com/naveenanimation20/reporting-labs
+git clone https://github.com/naveenautomationlabs/reporting-labs
 cd reporting-labs/examples
 npm install
 npx playwright test
