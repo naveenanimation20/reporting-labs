@@ -6,7 +6,8 @@ const [cmd] = process.argv.slice(2);
 if (cmd === 'init') {
   const file = path.resolve('reporting-labs.config.ts');
   if (fs.existsSync(file)) { console.log('reporting-labs.config.ts already exists.'); process.exit(0); }
-  fs.writeFileSync(file, `import type { ReportingLabsOptions } from 'reporting-labs';
+  fs.writeFileSync(file, `import 'reporting-labs/auto';   // records every request.* / page.request call in the report
+import type { ReportingLabsOptions } from 'reporting-labs';
 
 const config: ReportingLabsOptions = {
   title: 'My app – regression',
@@ -20,7 +21,10 @@ const config: ReportingLabsOptions = {
 export default config;
 `);
   console.log('Created reporting-labs.config.ts');
-  console.log("Add to playwright.config.ts:  reporter: [['reporting-labs', require('./reporting-labs.config').default]]");
+  console.log('');
+  console.log('Now in playwright.config.ts:');
+  console.log("  import reportingLabs from './reporting-labs.config';");
+  console.log("  reporter: [['list'], ['reporting-labs', reportingLabs]],");
 } else {
   console.log(`reporting-labs
 

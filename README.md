@@ -43,6 +43,7 @@ As soon as you set more than a title, put the reportingLabs options in a separat
 
 ```ts
 // reporting-labs.config.ts  (next to playwright.config.ts)
+import 'reporting-labs/auto';   // records every request.* / page.request call in the report
 import type { ReportingLabsOptions } from 'reporting-labs';
 
 const config: ReportingLabsOptions = {
@@ -179,13 +180,9 @@ test('creates an order', async ({ request }) => {
 
 ## API calls, recorded automatically
 
-Add one line to `playwright.config.ts`:
+If you use `reporting-labs.config.ts` from the section above, this is already switched on: the file starts with `import 'reporting-labs/auto'`. Otherwise add that one line to `playwright.config.ts`.
 
-```ts
-import 'reporting-labs/auto';
-```
-
-That is all. Every call your tests make through Playwright's `request` fixture, `page.request`, `context.request` or `playwright.request.newContext()` is recorded as it happens. No wrapper, no helper, your test code stays plain Playwright:
+Every call your tests make through Playwright's `request` fixture, `page.request`, `context.request` or `playwright.request.newContext()` is recorded as it happens. No wrapper, no helper, your test code stays plain Playwright:
 
 ```ts
 test('creates an order', async ({ request }) => {
