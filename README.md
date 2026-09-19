@@ -39,7 +39,7 @@ That is all. Everything below is optional.
 
 As soon as you set more than a title, put the reportingLabs options in a separate file. Your `playwright.config.ts` stays short, and all report settings live in one place.
 
-**Step 1.** Create the file (or let the CLI do it with `npx reporting-labs init`):
+**Step 1.** Run `npx reporting-labs init`. It writes `reporting-labs.config.ts` with every option listed and explained in comments, most of them commented out. Keep what you need, delete the rest. A trimmed-down version looks like this:
 
 ```ts
 // reporting-labs.config.ts  (next to playwright.config.ts)
@@ -278,7 +278,7 @@ reporter: [['reporting-labs', {
 }]]
 ```
 
-`npx reporting-labs init` writes a starter `reporting-labs.config.ts`; see [Keep the reporter options in their own file](#keep-the-reporter-options-in-their-own-file-recommended).
+`npx reporting-labs init` writes `reporting-labs.config.ts` with all of these options commented (`--js` for a JavaScript file, `--force` to overwrite); see [Keep the reporter options in their own file](#keep-the-reporter-options-in-their-own-file-recommended).
 
 ## Running in CI
 
