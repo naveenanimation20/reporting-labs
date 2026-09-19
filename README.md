@@ -1,4 +1,4 @@
-<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/assets/logo-wordmark.svg" alt="reportingLabs" width="320"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenautomationlabs/reporting-labs/main/assets/logo-wordmark.svg" alt="reportingLabs" width="320"></p>
 
 # reportingLabs
 
@@ -8,7 +8,7 @@ reportingLabs turns a test run into a single, self-contained HTML report. No ser
 
 It is runner-agnostic by design: the report is built from a plain JSON model that adapters feed. The **Playwright adapter ships today**; WebdriverIO, Cypress and Jest/Vitest adapters are on the roadmap.
 
-<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/overview.png" alt="Overview page of a reportingLabs report" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenautomationlabs/reporting-labs/main/docs/overview.png" alt="Overview page of a reportingLabs report" width="900"></p>
 
 ## Quick start
 
@@ -83,21 +83,21 @@ reporter: process.env.CI
 
 ## Examples you can copy
 
-The [`examples/`](https://github.com/naveenanimation20/reporting-labs/tree/main/examples) folder has one small spec per feature. Each one runs offline in a few seconds, so you can read it, run it, and copy what you need.
+The [`examples/`](https://github.com/naveenautomationlabs/reporting-labs/tree/main/examples) folder has one small spec per feature. Each one runs offline in a few seconds, so you can read it, run it, and copy what you need.
 
 | Spec | What it shows |
 |---|---|
-| [01-tag-your-tests.spec.ts](https://github.com/naveenanimation20/reporting-labs/blob/main/examples/01-tag-your-tests.spec.ts) | `meta()` with priority, severity, owner, feature, story; the same via tags and annotations |
-| [02-logs-and-test-data.spec.ts](https://github.com/naveenanimation20/reporting-labs/blob/main/examples/02-logs-and-test-data.spec.ts) | `log()` lines and `testData()` as key/value, table and CSV, with secrets masked |
-| [03-api-calls.spec.ts](https://github.com/naveenanimation20/reporting-labs/blob/main/examples/03-api-calls.spec.ts) | `recordApi()` around `request.post`, `api()` for manual records, a 404 in the API tab |
-| [04-steps-and-attachments.spec.ts](https://github.com/naveenanimation20/reporting-labs/blob/main/examples/04-steps-and-attachments.spec.ts) | `test.step()` bars, screenshot / JSON attachments, visual comparison viewer |
-| [05-outcomes.spec.ts](https://github.com/naveenanimation20/reporting-labs/blob/main/examples/05-outcomes.spec.ts) | skip with a reason, fixme, expected failure, timeout, a plain failure, a flaky test |
-| [06-bdd-style.spec.ts](https://github.com/naveenanimation20/reporting-labs/blob/main/examples/06-bdd-style.spec.ts) | Given / When / Then steps rendered as Gherkin |
-| [reporting-labs.config.ts](https://github.com/naveenanimation20/reporting-labs/blob/main/examples/reporting-labs.config.ts) | A complete reporter config, every option commented |
-| [playwright.config.ts](https://github.com/naveenanimation20/reporting-labs/blob/main/examples/playwright.config.ts) | How the reporter sits next to the built-in reporters |
+| [01-tag-your-tests.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/01-tag-your-tests.spec.ts) | `meta()` with priority, severity, owner, feature, story; the same via tags and annotations |
+| [02-logs-and-test-data.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/02-logs-and-test-data.spec.ts) | `log()` lines and `testData()` as key/value, table and CSV, with secrets masked |
+| [03-api-calls.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/03-api-calls.spec.ts) | `recordApi()` around `request.post`, `api()` for manual records, a 404 in the API tab |
+| [04-steps-and-attachments.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/04-steps-and-attachments.spec.ts) | `test.step()` bars, screenshot / JSON attachments, visual comparison viewer |
+| [05-outcomes.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/05-outcomes.spec.ts) | skip with a reason, fixme, expected failure, timeout, a plain failure, a flaky test |
+| [06-bdd-style.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/06-bdd-style.spec.ts) | Given / When / Then steps rendered as Gherkin |
+| [reporting-labs.config.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/reporting-labs.config.ts) | A complete reporter config, every option commented |
+| [playwright.config.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/playwright.config.ts) | How the reporter sits next to the built-in reporters |
 
 ```bash
-git clone https://github.com/naveenanimation20/reporting-labs
+git clone https://github.com/naveenautomationlabs/reporting-labs
 cd reporting-labs/examples && npm install && npx playwright test
 open reporting-labs/index.html
 ```
@@ -113,9 +113,9 @@ open reporting-labs/index.html
 - **Breakdown**: stacked bars per priority, severity, feature, owner, spec file, project or tag. Click a row to filter the test list. With more than one project you also get a feature × project heatmap.
 - **Slowest tests** and **Got slower** (tests that took 2× longer than last run), **Flakiest tests**, **Skipped** (with reasons), **Environment** and the **Trend** across runs.
 
-<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/heatmap.png" alt="Breakdown card with the feature by project heatmap" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenautomationlabs/reporting-labs/main/docs/heatmap.png" alt="Breakdown card with the feature by project heatmap" width="900"></p>
 
-<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/trend.png" alt="Trend chart with hover tooltip" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenautomationlabs/reporting-labs/main/docs/trend.png" alt="Trend chart with hover tooltip" width="900"></p>
 
 ### Failures: everything you need to triage
 
@@ -124,7 +124,7 @@ open reporting-labs/index.html
 - **Copy summary**: a Slack/Teams-ready message with top failures, owners, ticket keys and an owner breakdown.
 - The table shows every failed or flaky test with its history over the last runs as dots.
 
-<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/failures.png" alt="Failures page" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenautomationlabs/reporting-labs/main/docs/failures.png" alt="Failures page" width="900"></p>
 
 ### Test detail: the error, the steps, the evidence
 
@@ -134,11 +134,11 @@ open reporting-labs/index.html
 - Retries as tabs, screenshots inline (click to zoom), videos, traces, console output, logs, test data and API calls.
 - **Open in VS Code** jumps to the failing line.
 
-<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/test-detail.png" alt="Test detail with expected vs received diff and step bars" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenautomationlabs/reporting-labs/main/docs/test-detail.png" alt="Test detail with expected vs received diff and step bars" width="900"></p>
 
 ### Timeline: how the run used its workers
 
-<p align="center"><img src="https://raw.githubusercontent.com/naveenanimation20/reporting-labs/main/docs/timeline.png" alt="Timeline by worker" width="900"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/naveenautomationlabs/reporting-labs/main/docs/timeline.png" alt="Timeline by worker" width="900"></p>
 
 ## Make the report smarter: tag your tests
 
@@ -153,7 +153,7 @@ test('completes purchase', async ({ page }) => {
 });
 ```
 
-Full example: [examples/01-tag-your-tests.spec.ts](https://github.com/naveenanimation20/reporting-labs/blob/main/examples/01-tag-your-tests.spec.ts). Tags work too: `{ tag: ['@P1', '@severity:critical', '@owner:priya'] }`. Plain annotations (`test.info().annotations.push({ type: 'priority', description: 'P1' })`) are picked up as well.
+Full example: [examples/01-tag-your-tests.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/01-tag-your-tests.spec.ts). Tags work too: `{ tag: ['@P1', '@severity:critical', '@owner:priya'] }`. Plain annotations (`test.info().annotations.push({ type: 'priority', description: 'P1' })`) are picked up as well.
 
 Turn story, epic or issue keys into links:
 
@@ -178,7 +178,7 @@ test('creates an order', async ({ request }) => {
 });
 ```
 
-Full examples: [02-logs-and-test-data.spec.ts](https://github.com/naveenanimation20/reporting-labs/blob/main/examples/02-logs-and-test-data.spec.ts) and [03-api-calls.spec.ts](https://github.com/naveenanimation20/reporting-labs/blob/main/examples/03-api-calls.spec.ts). Passwords, tokens, API keys, `Authorization` / `Cookie` headers, JWTs and `Bearer …` values are masked as `****` everywhere. Add your own keys with `maskKeys: ['otp', 'pan']`.
+Full examples: [02-logs-and-test-data.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/02-logs-and-test-data.spec.ts) and [03-api-calls.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/03-api-calls.spec.ts). Passwords, tokens, API keys, `Authorization` / `Cookie` headers, JWTs and `Bearer …` values are masked as `****` everywhere. Add your own keys with `maskKeys: ['otp', 'pan']`.
 
 ## Run history: new vs known, flaky, slower
 
@@ -278,7 +278,7 @@ Two things to set up:
 1. **Publish the report.** Upload `reporting-labs/` as a build artifact (or archive it in Jenkins). Screenshots and fonts are inside `index.html`; videos and large files sit in `reporting-labs/assets/`.
 2. **Keep the history.** `reporting-labs.history.json` is what powers the trend, new vs known failures, flaky history and duration regressions. On GitHub Actions restore and save it with `actions/cache`; on Jenkins the workspace usually persists on its own.
 
-Ready-to-copy samples: [docs/ci/github-actions.yml](https://github.com/naveenanimation20/reporting-labs/blob/main/docs/ci/github-actions.yml) and [docs/ci/Jenkinsfile](https://github.com/naveenanimation20/reporting-labs/blob/main/docs/ci/Jenkinsfile).
+Ready-to-copy samples: [docs/ci/github-actions.yml](https://github.com/naveenautomationlabs/reporting-labs/blob/main/docs/ci/github-actions.yml) and [docs/ci/Jenkinsfile](https://github.com/naveenautomationlabs/reporting-labs/blob/main/docs/ci/Jenkinsfile).
 
 ```yaml
 # GitHub Actions, the two steps that matter
