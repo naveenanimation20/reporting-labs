@@ -8,6 +8,7 @@ import { execSync } from 'child_process';
 import { ReportingLabsOptions, ReportData, TestData, ResultData, StepData, AttachmentData, Status, EnvRow, ErrorData } from './types';
 import { renderHtml } from './template';
 import { makeMasker, parseCsv } from './mask';
+import { explainError } from './explain';
 import type { HistoryEntry } from './types';
 
 const DEFAULT_EMBED_LIMIT = 2 * 1024 * 1024;
@@ -281,6 +282,7 @@ export default class ReportingLabsReporter implements Reporter {
 
   private serializeError(e: TestError): ErrorData {
     const out: ErrorData = { message: stripAnsi(e.message ?? e.value ?? '') };
+    const why = explainError(out.message); if (why) out.explain = why;
     if (e.stack) out.stack = stripAnsi(e.stack);
     if (e.snippet) out.snippet = stripAnsi(e.snippet);
     if (e.location) out.location = { file: this.rel(e.location.file), line: e.location.line, column: e.location.column };

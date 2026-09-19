@@ -571,7 +571,7 @@ html,body{-webkit-font-smoothing:antialiased}
 .attn2 td:first-child{border-radius:6px 0 0 6px} .attn2 td:last-child{border-radius:0 6px 6px 0}
 .attn2 .pr{width:96px;white-space:nowrap;font-size:12.5px;line-height:1.35} .attn2 .pr .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px}
 .attn2 .pr span{font-weight:600;color:var(--ink)} .attn2 .pr small{display:block;color:var(--ink-3);font-size:11.5px;padding-left:15px}
-.attn2 .tt .n{font-weight:500;color:var(--ink);line-height:1.35} .attn2 .tt .s{font-size:12px;color:var(--ink-3);margin-top:2px} .attn2 .tt .s b.new{color:var(--fail);font-weight:600}
+.attn2 .tt .n{font-weight:500;color:var(--ink);line-height:1.35} .attn2 .tt .s{font-size:12px;color:var(--ink-3);margin-top:2px} .attn2 .tt .s b.new{color:var(--fail);font-weight:600} .attn2 .tt .s .rsn{color:var(--ink-2)}
 .attn2 .ow{text-align:right;color:var(--ink-3);font-size:12.5px;white-space:nowrap;width:1%;padding-top:10px}
 .attn-foot{margin-top:auto;padding-top:12px;border-top:1px solid var(--line)} .attn-foot button{font-size:12.5px;font-weight:500;color:var(--accent-2)} .attn-foot button:hover{text-decoration:underline}
 .clu2{list-style:none;margin:0;padding:0}
@@ -587,6 +587,12 @@ html,body{-webkit-font-smoothing:antialiased}
 .note{padding:10px 14px;border-radius:8px;margin-bottom:10px;border:1px solid var(--line)} .note.ok{background:var(--pass-bg);color:var(--ink)} .note.warn{background:var(--flaky-bg);color:var(--flaky-ink)}
 .badge.xfail{background:var(--flaky-bg);color:var(--flaky-ink)}
 .errwrap+.errwrap{margin-top:14px}
+.why{border:1px solid var(--line);border-left:3px solid var(--fail);border-radius:0 var(--radius) var(--radius) 0;padding:10px 14px;margin-bottom:10px;background:var(--surface)}
+.why-c{font-size:12.5px;color:var(--ink);margin-bottom:2px;line-height:1.4} .why-c .why-k{margin-right:2px}
+.why-l{display:flex;align-items:center;gap:8px;margin-bottom:4px} .why-k{font-size:12px;font-weight:600;color:var(--fail)} .why-a{font:11.5px var(--mono);color:var(--ink-3)}
+.why-s{font-size:var(--fs);color:var(--ink);line-height:1.45} .why-h{font-size:12.5px;color:var(--ink-2);margin-top:4px;line-height:1.45}
+.why.assertion,.why.visual{border-left-color:#C77D14} .why.assertion .why-k,.why.visual .why-k{color:#9A6A00}
+.why.script,.why.thrown,.why.file{border-left-color:var(--ink-3)} .why.script .why-k,.why.thrown .why-k,.why.file .why-k{color:var(--ink-2)}
 .errloc{font-family:var(--mono);color:var(--ink-3);margin-bottom:6px} .errloc a{color:var(--accent-2);text-decoration:none} .errloc a:hover{text-decoration:underline}
 .snip{margin:10px 0 0;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:var(--mono);line-height:1.55;white-space:pre;overflow:auto;color:var(--ink-2)}
 /* ---------- triage extras: history, diff, export, env, heatmap ---------- */
@@ -919,7 +925,7 @@ function csvCell(v){ v=v==null?'':String(v); return /[",\n]/.test(v)? '"'+v.repl
 function failureRows(){
   const bad=data.tests.filter(t=>isFail(t.outcome)||t.outcome==='flaky').sort((a,b)=>rank(a)-rank(b));
   return bad.map(t=>{ const r=t.results[t.results.length-1], e=r&&r.errors[0], si=sinceInfo(t);
-    return { title:t.title, suite:t.path.join(' > '), file:t.file, line:t.line, project:t.project, outcome:label[t.outcome], since:si?(si.kind==='new'?'new':runLabel(si.since)):'', priority:t.meta.priority||'', severity:t.meta.severity||'', owner:t.meta.owner||'', feature:t.meta.feature||'', story:t.meta.story||t.meta.issue||'', epic:t.meta.epic||'', attempts:t.results.length, duration_ms:Math.round(t.duration), error:e?e.message.split('\n')[0]:'', tags:t.tags.join(' ') }; });
+    return { title:t.title, suite:t.path.join(' > '), file:t.file, line:t.line, project:t.project, outcome:label[t.outcome], since:si?(si.kind==='new'?'new':runLabel(si.since)):'', priority:t.meta.priority||'', severity:t.meta.severity||'', owner:t.meta.owner||'', feature:t.meta.feature||'', story:t.meta.story||t.meta.issue||'', epic:t.meta.epic||'', attempts:t.results.length, duration_ms:Math.round(t.duration), reason:e&&e.explain?e.explain.label:'', why:e&&e.explain?e.explain.summary:'', error:e?e.message.split('\n')[0]:'', tags:t.tags.join(' ') }; });
 }
 function exportCsv(){ const rows=failureRows(); if(!rows.length) return; const cols=Object.keys(rows[0]); download(fileStem()+'-failures.csv', [cols.join(','), ...rows.map(r=>cols.map(c=>csvCell(r[c])).join(','))].join('\n'), 'text/csv'); }
 function exportJson(){ const rows=failureRows().map(r=>{ const t=data.tests.find(x=>x.title===r.title&&x.project===r.project&&x.file===r.file); const res=t&&t.results[t.results.length-1]; return Object.assign({}, r, {errorFull:res&&res.errors[0]?res.errors[0].message:''}); });
@@ -938,7 +944,12 @@ function tokenDiff(a,b){
   const join=(arr,cls)=>{ const out=[]; for(const [t,d] of arr){ const last=out[out.length-1]; if(last&&last.d===d) last.t+=t; else out.push({t,d}); } return out.map(x=>x.d?h('mark',{class:cls},x.t):x.t); };
   return {a:join(A,'del'), b:join(B,'ins')};
 }
-function errorView(e){ return h('div',{class:'errwrap'}, errorWhere(e), errorBody(e), e.snippet? h('pre',{class:'snip'}, e.snippet) : null); }
+function errorView(e){ return h('div',{class:'errwrap'}, whyView(e.explain), errorWhere(e), errorBody(e), e.snippet? h('pre',{class:'snip'}, e.snippet) : null); }
+function whyView(x){
+  if(!x) return null;
+  return h('div',{class:'why '+x.kind}, h('div',{class:'why-l'}, h('span',{class:'why-k'},x.label), x.action? h('code',{class:'why-a'},x.action):null),
+    h('div',{class:'why-s'},x.summary), x.hint? h('div',{class:'why-h'},x.hint):null);
+}
 function errorWhere(e){
   if(!e.location) return null;
   const l=e.location, txt=l.file+':'+l.line+(l.column?':'+l.column:'');
@@ -1036,6 +1047,7 @@ function attention(limit){
   const sub=(t,projects)=>{ const parts=[t.file.split('/').pop()];
     if(data.projects.length>1) parts.push(projects.length>1? projects.length+' projects' : projects[0]);
     const si=sinceInfo(t); if(si) parts.push(si.kind==='new'? h('b',{class:'new'},'new this run') : 'failing since '+runLabel(si.since));
+    const le=t.results[t.results.length-1]&&t.results[t.results.length-1].errors[0]; if(le&&le.explain) parts.push(h('span',{class:'rsn',title:le.explain.summary},le.explain.label));
     else if(t.outcome==='flaky') parts.push('passed on retry '+t.results.length);
     const out=[]; parts.forEach((x,k)=>{ if(k) out.push(' · '); out.push(x); }); return out; };
   const tbl=h('table',{class:'attn2'}, h('tbody',{}, rows.map(({t,projects})=>h('tr',{tabindex:'0',onclick:()=>select(t.id),onkeydown:e=>{ if(e.key==='Enter') select(t.id); }},
@@ -1090,7 +1102,7 @@ function errorSignature(msg){
 }
 function failureClusters(){
   const m=new Map();
-  for(const t of data.tests){ if(!isFail(t.outcome)) continue; const r=t.results[t.results.length-1]; const e=r&&r.errors[0]; const sig=errorSignature(e?e.message:'(no error message)'); const c=m.get(sig)||{sig,sample:e?e.message.split('\n').slice(0,2).join('\n'):'(no error message)',tests:[]}; c.tests.push(t); m.set(sig,c); }
+  for(const t of data.tests){ if(!isFail(t.outcome)) continue; const r=t.results[t.results.length-1]; const e=r&&r.errors[0]; const x=e&&e.explain; const sig=x&&!/^(thrown|script)$/.test(x.kind)? x.kind+'|'+(x.locator||x.url||'')+'|'+(x.matcher||x.action||'') : errorSignature(e?e.message:'(no error message)'); const c=m.get(sig)||{sig,sample:e?e.message.split('\n').slice(0,2).join('\n'):'(no error message)',why:e&&e.explain?e.explain:null,tests:[]}; c.tests.push(t); m.set(sig,c); }
   return [...m.values()].sort((a,b)=>b.tests.length-a.tests.length);
 }
 function clustersView(cl){
@@ -1100,7 +1112,7 @@ function clustersView(cl){
     const who=[]; names.forEach(([title,ts],k)=>{ if(k) who.push(h('span',{class:'sep'},'·')); who.push(h('button',{onclick:()=>select(ts[0].id),title:ts.map(t=>t.project).join(', ')}, title, data.projects.length>1&&ts.length>1? h('small',{},' ×'+ts.length) : null)); });
     if(extra>0) who.push(h('span',{class:'sep'},'·'), h('span',{class:'ex'},'+'+extra+' more'));
     return h('li',{}, h('span',{class:'n'}, c.tests.length, h('small',{},c.tests.length===1?'test':'tests')),
-      h('div',{class:'b'}, h('div',{class:'msg',title:c.sample}, c.sample.split('\n')[0]), h('div',{class:'who'}, who)));
+      h('div',{class:'b'}, c.why? h('div',{class:'why-c'}, h('span',{class:'why-k'},c.why.label), ' ', c.why.summary) : null, h('div',{class:'msg',title:c.sample}, c.sample.split('\n')[0]), h('div',{class:'who'}, who)));
   }));
 }
 function trend(){

@@ -134,7 +134,8 @@ export interface EnvRow { k: string; v: string; href?: string }
 
 export type Status = 'passed' | 'failed' | 'skipped' | 'flaky' | 'timedOut' | 'interrupted';
 
-export interface ErrorData { message: string; stack?: string; snippet?: string; location?: { file: string; line: number; column: number } }
+export interface ErrorExplainData { kind: string; label: string; summary: string; hint?: string; locator?: string; action?: string; matcher?: string; timeoutMs?: number; url?: string }
+export interface ErrorData { message: string; stack?: string; snippet?: string; location?: { file: string; line: number; column: number }; /** Plain-language reading of the message, rule based. The message itself is always kept. */ explain?: ErrorExplainData }
 
 export interface StepData {
   title: string;
