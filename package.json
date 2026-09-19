@@ -57,11 +57,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/naveenanimation20/reporting-labs.git"
+    "url": "git+https://github.com/naveenautomationlabs/reporting-labs.git"
   },
-  "homepage": "https://github.com/naveenanimation20/reporting-labs#readme",
+  "homepage": "https://github.com/naveenautomationlabs/reporting-labs#readme",
   "bugs": {
-    "url": "https://github.com/naveenanimation20/reporting-labs/issues"
+    "url": "https://github.com/naveenautomationlabs/reporting-labs/issues"
   },
   "engines": {
     "node": ">=18"
