@@ -12,6 +12,14 @@ import type { HistoryEntry } from './types';
 
 const DEFAULT_EMBED_LIMIT = 2 * 1024 * 1024;
 
+/** Attach steps created by log() and the automatic API capture; the data shows in its own section, so hide the step. */
+function isInternalAttach(s: TestStep): boolean {
+  return s.category === 'test.attach' && /^Attach "(rl:log|(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) )/.test(s.title);
+}
+
+/** Meta keys shown on every test and turned into links, without being breakdown dimensions. */
+const META_KEYS = ['priority', 'severity', 'feature', 'owner', 'epic', 'story', 'issue', 'bug', 'component', 'module', 'team', 'sprint', 'testcase', 'tms', 'requirement'];
+
 export default class ReportingLabsReporter implements Reporter {
   private options: ReportingLabsOptions;
   private config!: FullConfig;
@@ -242,20 +250,26 @@ export default class ReportingLabsReporter implements Reporter {
     return (this.options.dimensions ?? ['priority', 'severity', 'feature', 'owner']).map(d => d.toLowerCase());
   }
 
-  /** Pull dimension values from annotations and tags. */
+  /** Keys picked up from tags and annotations even when they are not breakdown dimensions. */
+  private metaKeys(): string[] {
+    return [...new Set([...this.dimensions(), ...META_KEYS, ...Object.keys(this.options.links ?? {}).map(k => k.toLowerCase())])].filter(k => k !== '*');
+  }
+
+  /** Pull meta values (priority, owner, story, epic...) from annotations and tags. */
   private extractMeta(test: TestCase): Record<string, string> {
-    const dims = this.dimensions();
+    const dims = this.metaKeys();
     const meta: Record<string, string> = {};
-    for (const a of test.annotations) {
-      const k = a.type.toLowerCase();
-      if (dims.includes(k) && a.description) meta[k] = a.description;
-    }
+    // Tags first (describe-level, then test-level), annotations last so a test can override its describe's tags.
     for (const raw of test.tags) {
       const tag = raw.replace(/^@/, '');
       const m = tag.match(/^([a-z_-]+)[:=](.+)$/i);
       if (m && dims.includes(m[1].toLowerCase())) { meta[m[1].toLowerCase()] = m[2]; continue; }
       if (/^P[0-4]$/i.test(tag) && dims.includes('priority') && !meta.priority) meta.priority = tag.toUpperCase();
       if (/^(blocker|critical|major|minor|trivial)$/i.test(tag) && dims.includes('severity') && !meta.severity) meta.severity = tag.toLowerCase();
+    }
+    for (const a of test.annotations) {
+      const k = a.type.toLowerCase();
+      if (dims.includes(k) && a.description) meta[k] = a.description;
     }
     return meta;
   }
@@ -310,6 +324,11 @@ export default class ReportingLabsReporter implements Reporter {
       if (a.contentType === 'application/x-rl-api' && body) { try { api.push(this.masker.mask(JSON.parse(body.toString())) as any); } catch { /* ignore */ } continue; }
       if (a.contentType === 'application/x-rl-data' && body) { data.push(this.toDataBlock(a.name, body.toString())); continue; }
       if (body && (a.contentType === 'text/csv' || /\.csv$/i.test(a.name))) { data.push(this.toDataBlock(a.name, JSON.stringify({ csv: body.toString() }))); continue; }
+      // Plain test.info().attach(name, { body: JSON.stringify(x), contentType: 'application/json' }) renders like testData().
+      if (body && a.contentType === 'application/json' && body.length <= 512 * 1024) {
+        const block = this.toDataBlock(a.name, body.toString());
+        if (block.kind !== 'text') { data.push(block); continue; }
+      }
       normal.push(a);
     }
     return {
@@ -320,10 +339,10 @@ export default class ReportingLabsReporter implements Reporter {
       startTime: r.startTime.getTime(),
       workerIndex: r.parallelIndex,
       errors: r.errors.map(e => this.serializeError(e)),
-      steps: r.steps.map(s => this.serializeStep(s)),
+      steps: r.steps.filter(s => !isInternalAttach(s)).map(s => this.serializeStep(s)),
       attachments: normal.map(a => this.serializeAttachment(a, test)).filter(Boolean) as AttachmentData[],
-      stdout: r.stdout.map(c => stripAnsi(c.toString())),
-      stderr: r.stderr.map(c => stripAnsi(c.toString())),
+      stdout: r.stdout.map(c => this.masker.maskStr(stripAnsi(c.toString()))),
+      stderr: r.stderr.map(c => this.masker.maskStr(stripAnsi(c.toString()))),
     };
   }
 
@@ -333,7 +352,7 @@ export default class ReportingLabsReporter implements Reporter {
       category: s.category,
       duration: s.duration,
       error: s.error?.message ? stripAnsi(s.error.message) : undefined,
-      steps: s.steps.map(c => this.serializeStep(c)),
+      steps: s.steps.filter(c => !isInternalAttach(c)).map(c => this.serializeStep(c)),
     };
   }
 
