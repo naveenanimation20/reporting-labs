@@ -6,7 +6,7 @@ Small, self-contained spec files that show every reportingLabs feature. They use
 |---|---|
 | [01-tag-your-tests.spec.ts](01-tag-your-tests.spec.ts) | `meta()` for priority, severity, owner, feature, story; the same via tags and annotations |
 | [02-logs-and-test-data.spec.ts](02-logs-and-test-data.spec.ts) | `log()` lines, `testData()` as key/value, table and CSV; secrets masked |
-| [03-api-calls.spec.ts](03-api-calls.spec.ts) | `recordApi()` around a request, `api()` for manual records; the API tab |
+| [03-api-calls.spec.ts](03-api-calls.spec.ts) | Plain `request.post` / `page.request` calls recorded automatically; `api()` for other clients; the API tab |
 | [04-steps-and-attachments.spec.ts](04-steps-and-attachments.spec.ts) | `test.step()` bars, screenshots, JSON and text attachments, visual comparison |
 | [05-outcomes.spec.ts](05-outcomes.spec.ts) | skip with a reason, fixme, expected failure (`test.fail`), timeout, retries |
 | [06-bdd-style.spec.ts](06-bdd-style.spec.ts) | Given / When / Then steps rendered as Gherkin |

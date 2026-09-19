@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { meta, api, recordApi } from 'reporting-labs';
+import { meta, api } from 'reporting-labs';
 import * as http from 'http';
+
+// Nothing special in these tests: plain Playwright `request` calls.
+// `import 'reporting-labs/auto'` in playwright.config.ts records every one of them
+// (method, URL, status, timing, headers, request + response body, a cURL command)
+// in the test detail and the API tab. Secrets are masked automatically.
 
 // A tiny local API so the example runs offline. In your project, point `request` at your real backend.
 let server: http.Server; let base = '';
@@ -9,8 +14,9 @@ test.beforeAll(async () => {
     let body = ''; req.on('data', c => body += c);
     req.on('end', () => {
       res.setHeader('content-type', 'application/json');
-      if (req.method === 'POST' && req.url === '/v1/orders') { res.statusCode = 201; res.end(JSON.stringify({ id: 'ord_10422', total: 1999, items: JSON.parse(body).qty })); }
-      else if (req.url === '/v1/orders/ord_10422') { res.end(JSON.stringify({ id: 'ord_10422', status: 'paid' })); }
+      const path = (req.url ?? '').split('?')[0];
+      if (req.method === 'POST' && path === '/v1/orders') { res.statusCode = 201; res.end(JSON.stringify({ id: 'ord_10422', total: 1999, items: JSON.parse(body).qty })); }
+      else if (path === '/v1/orders/ord_10422') { res.end(JSON.stringify({ id: 'ord_10422', status: 'paid' })); }
       else { res.statusCode = 404; res.end(JSON.stringify({ error: 'not found' })); }
     });
   });
@@ -23,12 +29,10 @@ test.describe('Orders API', () => {
   test('creates an order', async ({ request }) => {
     meta({ priority: 'P0', severity: 'blocker', owner: 'naveen', feature: 'orders-api', story: 'API-301' });
 
-    // recordApi wraps the call: method, URL, status, duration, headers and both bodies land in the report
-    // (test detail + API tab). Authorization headers and secret-looking fields are masked automatically.
-    const headers = { Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.demo.token', 'Content-Type': 'application/json' };
-    const data = { sku: 'MBP-14', qty: 2, card: { number: '4111111111111111', cvv: '123' } };
-    const res = await recordApi('POST', `${base}/v1/orders`, { headers, data },
-      () => request.post(`${base}/v1/orders`, { headers, data }));
+    const res = await request.post(`${base}/v1/orders`, {
+      headers: { Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.demo.token' },   // shown as **** in the report
+      data: { sku: 'MBP-14', qty: 2, card: { number: '4111111111111111', cvv: '123' } },
+    });
 
     expect(res.status()).toBe(201);
     expect((await res.json()).id).toBe('ord_10422');
@@ -37,14 +41,21 @@ test.describe('Orders API', () => {
   test('reads the order back', async ({ request }) => {
     meta({ priority: 'P1', severity: 'major', owner: 'naveen', feature: 'orders-api', story: 'API-302' });
 
-    const res = await recordApi('GET', `${base}/v1/orders/ord_10422`, undefined, () => request.get(`${base}/v1/orders/ord_10422`));
+    const res = await request.get(`${base}/v1/orders/ord_10422`, { params: { expand: 'items' } });
     expect((await res.json()).status).toBe('paid');
   });
 
-  test('records a call made elsewhere', async () => {
+  test('calls made from a page are recorded too', async ({ page }) => {
     meta({ priority: 'P2', severity: 'minor', owner: 'priya', feature: 'orders-api' });
 
-    // When the HTTP call happens in a helper or another client, record it manually.
+    const res = await page.request.get(`${base}/v1/orders/ord_10422`);
+    expect(res.ok()).toBeTruthy();
+  });
+
+  test('records a call made with another client', async () => {
+    meta({ priority: 'P2', severity: 'minor', owner: 'priya', feature: 'orders-api' });
+
+    // Only needed when the HTTP call does not go through Playwright (axios, fetch, a Java service...).
     await api({
       method: 'DELETE', url: `${base}/v1/orders/ord_draft_1`,
       status: 204, duration: 33,
@@ -55,7 +66,7 @@ test.describe('Orders API', () => {
   test('rejects an unknown order', async ({ request }) => {
     meta({ priority: 'P2', severity: 'minor', owner: 'priya', feature: 'orders-api' });
 
-    const res = await recordApi('GET', `${base}/v1/orders/nope`, undefined, () => request.get(`${base}/v1/orders/nope`));
+    const res = await request.get(`${base}/v1/orders/nope`);
     expect(res.status()).toBe(404);                      // a 4xx/5xx call is highlighted in the API tab
   });
 });

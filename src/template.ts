@@ -415,7 +415,8 @@ table.tbl{border-collapse:collapse;font-size:12.5px;width:100%;min-width:100%}
 .api-col{padding:10px 12px;min-width:0} .api-col+.api-col{border-left:1px solid var(--line)}
 .api-col h5{margin:0 0 6px;font-size:11px;font-weight:600;color:var(--ink-3)}
 .api-col pre{margin:0 0 10px;background:var(--surface-2);padding:8px 10px;border-radius:4px;font:11.5px/1.5 var(--mono);white-space:pre-wrap;word-break:break-all;max-height:260px;overflow:auto}
-.api.collapsed .api-body{display:none}
+.api.collapsed .api-body,.api.collapsed .api-tools{display:none}
+.api-tools{display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--line);background:var(--surface)} .api-tools .btn{padding:5px 10px;cursor:pointer} .api-tools .btn.done{color:var(--pass);border-color:var(--pass)}
 /* bdd */
 .step .kw{font-weight:600;color:var(--accent);margin-right:4px} .step .kw.and{color:var(--ink-3)}
 .badge.scenario{background:var(--surface-2);color:var(--ink-2)}
@@ -736,7 +737,7 @@ function failuresView(){
 }
 function apiView(){
   const calls=[]; for(const t of data.tests) for(const r of t.results) for(const c of r.api) calls.push({c,t,r});
-  if(!calls.length) return h('div',{class:'card'},'No API calls recorded. Use api() or recordApi() from reporting-labs inside your tests.');
+  if(!calls.length) return h('div',{class:'card'},h('b',{},'No API calls recorded.'),' Add ',h('code',{},"import 'reporting-labs/auto'"),' to playwright.config.ts and every request.get / request.post / page.request call shows up here with headers, bodies and a cURL command. Calls made with other clients can be recorded with api().');
   const bad=calls.filter(x=>(x.c.status||0)>=400).length, avg=Math.round(calls.reduce((a,x)=>a+(x.c.duration||0),0)/calls.length), slow=calls.filter(x=>(x.c.duration||0)>1000).length;
   calls.sort((a,b)=>((b.c.status||0)>=400)-((a.c.status||0)>=400)||(b.c.duration||0)-(a.c.duration||0));
   const byHost=new Map(); for(const x of calls){ try{ const hst=new URL(x.c.url).host; byHost.set(hst,(byHost.get(hst)||0)+1);}catch(e){} }
@@ -1328,9 +1329,23 @@ function apiPanel(c){
   const head=h('button',{class:'api-head',onclick:()=>wrap.classList.toggle('collapsed')}, h('span',{class:'m '+c.method.toUpperCase()},c.method.toUpperCase()), h('span',{class:'u',title:c.url},c.url), st?h('span',{class:'sc '+cls},st):null, c.duration!=null?h('span',{class:'d'},ms(c.duration)):null);
   const pre=v=>v==null?null:h('pre',{}, typeof v==='string'?v:JSON.stringify(v,null,2));
   const col=(title,headers,bodyv)=>h('div',{class:'api-col'}, h('h5',{},title), headers&&Object.keys(headers).length? [h('h5',{},'Headers'), pre(headers)] : null, bodyv!=null? [h('h5',{},'Body'), pre(bodyv)] : h('div',{style:'font-size:12px;color:var(--ink-3)'},'no body'));
-  wrap.append(head, h('div',{class:'api-body'}, col('Request',c.requestHeaders,c.requestBody), col('Response',c.responseHeaders,c.responseBody)));
+  const tools=h('div',{class:'api-tools'}, h('button',{class:'btn',onclick:e=>copyText(curlOf(c),e.currentTarget,'Copied')},'Copy as cURL'), h('button',{class:'btn',onclick:e=>copyText(c.url,e.currentTarget,'Copied')},'Copy URL'));
+  wrap.append(head, h('div',{class:'api-body'}, col('Request',c.requestHeaders,c.requestBody), col('Response',c.responseHeaders,c.responseBody)), tools);
   if(cls==='bad') wrap.classList.remove('collapsed');
   return wrap;
+}
+function curlOf(c){
+  const q=v=>"'"+String(v).replace(/'/g,"'\\''")+"'";
+  const hdr=c.requestHeaders||{}, type=Object.keys(hdr).filter(k=>k.toLowerCase()==='content-type').map(k=>hdr[k])[0]||'';
+  const parts=['curl -X '+c.method.toUpperCase()+' '+q(c.url)];
+  for(const k of Object.keys(hdr)) parts.push('-H '+q(k+': '+hdr[k]));
+  if(c.requestBody!=null){
+    let b=c.requestBody;
+    if(typeof b==='object' && /x-www-form-urlencoded/i.test(type)) b=Object.keys(b).map(k=>encodeURIComponent(k)+'='+encodeURIComponent(String(b[k]))).join('&');
+    else if(typeof b!=='string') b=JSON.stringify(b);
+    if(!/^<(binary|file|multipart)/.test(b)) parts.push('--data-raw '+q(b));
+  }
+  return parts.join(' \\\n  ');
 }
 function kb(n){ return n<1024?n+' B':n<1048576?(n/1024).toFixed(0)+' KB':(n/1048576).toFixed(1)+' MB'; }
 function compare(set){
