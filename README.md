@@ -169,6 +169,7 @@ Run it two or three times to see the history features (new vs known failures, fl
 
 ### Test detail: the error, the steps, the proof
 
+- **What went wrong, in plain words.** Above every error the report says what happened and what to check first: "Element not found: `#checkout` was not on the page within 5s", "Element covered by another element: a `<div class=overlay>` was on top", "Site unreachable", "Test timed out", "Assertion failed: expected "90", got "100"". Playwright's own message stays right below it, untouched. The same label shows in Needs attention and groups the Failure clusters.
 - **Expected vs received** side by side with the difference highlighted.
 - Error **location** (opens in VS Code), Playwright's **code snippet**, full message and stack.
 - **Steps** with a bar per step showing its share of the test time. Given/When/Then titles are styled as Gherkin.
