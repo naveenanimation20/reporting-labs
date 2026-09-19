@@ -89,7 +89,7 @@ The [`examples/`](https://github.com/naveenautomationlabs/reporting-labs/tree/ma
 |---|---|
 | [01-tag-your-tests.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/01-tag-your-tests.spec.ts) | `meta()` with priority, severity, owner, feature, story; the same via tags and annotations |
 | [02-logs-and-test-data.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/02-logs-and-test-data.spec.ts) | `log()` lines and `testData()` as key/value, table and CSV, with secrets masked |
-| [03-api-calls.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/03-api-calls.spec.ts) | `recordApi()` around `request.post`, `api()` for manual records, a 404 in the API tab |
+| [03-api-calls.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/03-api-calls.spec.ts) | Plain `request.post` / `page.request` calls recorded automatically, `api()` for other clients, a 404 in the API tab |
 | [04-steps-and-attachments.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/04-steps-and-attachments.spec.ts) | `test.step()` bars, screenshot / JSON attachments, visual comparison viewer |
 | [05-outcomes.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/05-outcomes.spec.ts) | skip with a reason, fixme, expected failure, timeout, a plain failure, a flaky test |
 | [06-bdd-style.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/06-bdd-style.spec.ts) | Given / When / Then steps rendered as Gherkin |
@@ -161,10 +161,10 @@ Turn story, epic or issue keys into links:
 links: { story: 'https://acme.atlassian.net/browse/{id}', epic: 'https://acme.atlassian.net/browse/{id}' }
 ```
 
-## Logs, test data and API calls
+## Logs and test data
 
 ```ts
-import { log, testData, api, recordApi } from 'reporting-labs';
+import { log, testData } from 'reporting-labs';
 
 test('creates an order', async ({ request }) => {
   await log('starting with an empty cart');                                 // timestamped log line
@@ -172,11 +172,29 @@ test('creates an order', async ({ request }) => {
   await testData({ user: 'naveen@x.com', password: 'S3cret' }, 'Login');    // object → key/value block
   await testData(rowsFromExcelOrJson, 'Coupons');                           // array of objects → table
   await testData(fs.readFileSync('data/users.csv', 'utf8'), 'users.csv');   // CSV string → table
-
-  const res = await recordApi('POST', '/v1/orders', { headers, data },
-    () => request.post('/v1/orders', { headers, data }));                   // request + response panel
 });
 ```
+
+## API calls, recorded automatically
+
+Add one line to `playwright.config.ts`:
+
+```ts
+import 'reporting-labs/auto';
+```
+
+That is all. Every call your tests make through Playwright's `request` fixture, `page.request`, `context.request` or `playwright.request.newContext()` is recorded as it happens. No wrapper, no helper, your test code stays plain Playwright:
+
+```ts
+test('creates an order', async ({ request }) => {
+  const res = await request.post('/v1/orders', { headers, data });
+  expect(res.status()).toBe(201);
+});
+```
+
+Each call shows up in the test detail and in the **API** tab with method, URL, status, time taken, request and response headers and bodies, and a **Copy as cURL** button so you can replay it from a terminal. Failed calls (4xx / 5xx, or no connection) are highlighted. Binary responses are summarised instead of dumped, and bodies over 200 KB are truncated.
+
+Calls that do not go through Playwright (axios, `fetch`, a Java service in the same pipeline) can still be recorded by hand with `api({ method, url, status, duration, requestBody, responseBody })`.
 
 Full examples: [02-logs-and-test-data.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/02-logs-and-test-data.spec.ts) and [03-api-calls.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/03-api-calls.spec.ts). Passwords, tokens, API keys, `Authorization` / `Cookie` headers, JWTs and `Bearer …` values are masked as `****` everywhere. Add your own keys with `maskKeys: ['otp', 'pan']`.
 
