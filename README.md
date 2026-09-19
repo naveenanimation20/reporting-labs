@@ -87,8 +87,8 @@ The [`examples/`](https://github.com/naveenautomationlabs/reporting-labs/tree/ma
 
 | Spec | What it shows |
 |---|---|
-| [01-tag-your-tests.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/01-tag-your-tests.spec.ts) | Tags like `@P0`, `@owner:naveen`, `@story:SHOP-250`, tags on a describe, annotations, and the `meta()` shortcut |
-| [02-logs-and-test-data.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/02-logs-and-test-data.spec.ts) | `console.log` and JSON / CSV attachments shown as logs, key/value and tables; `log()` and `testData()` shortcuts |
+| [01-tag-your-tests.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/01-tag-your-tests.spec.ts) | `meta()` with priority, severity, owner, feature, story; the same via tags and annotations |
+| [02-logs-and-test-data.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/02-logs-and-test-data.spec.ts) | `log()` lines and `testData()` as key/value, table and CSV, with secrets masked |
 | [03-api-calls.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/03-api-calls.spec.ts) | Plain `request.post` / `patch` / `delete` and `page.request` calls against gorest.in, recorded automatically, a 403 in the API tab, `api()` for other clients |
 | [04-steps-and-attachments.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/04-steps-and-attachments.spec.ts) | `test.step()` bars, screenshot / JSON attachments, visual comparison viewer |
 | [05-outcomes.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/05-outcomes.spec.ts) | skip with a reason, fixme, expected failure, timeout, a plain failure, a flaky test |
@@ -140,49 +140,22 @@ open reporting-labs/index.html
 
 <p align="center"><img src="https://raw.githubusercontent.com/naveenautomationlabs/reporting-labs/main/docs/timeline.png" alt="Timeline by worker" width="900"></p>
 
-## Add details to a test
+## Make the report smarter: describe your tests with meta()
 
-Plain Playwright already has everything the report needs. No helper to import.
-
-**Priority, severity, owner, feature, story: use tags.**
+One line per test gives you priority ranking, owner rollups, feature breakdowns and Jira links. Your Playwright tags like `@sanity` or `@regression` stay as they are and still show on the test.
 
 ```ts
-test('completes purchase', { tag: ['@P0', '@blocker', '@owner:naveen', '@feature:payment', '@story:SHOP-250'] }, async ({ page }) => {
+import { meta } from 'reporting-labs';
+
+test('completes purchase', async ({ page }) => {
+  meta({ priority: 'P0', severity: 'blocker', owner: 'naveen', feature: 'payment', epic: 'EPIC-18', story: 'SHOP-250' });
   // ...
 });
 ```
 
-- `@P0` to `@P4` is the priority. `@blocker`, `@critical`, `@major`, `@minor`, `@trivial` is the severity.
-- `@name:value` is anything else: `@owner:priya`, `@feature:search`, `@story:SHOP-231`, `@epic:EPIC-18`, `@issue:BUG-42`.
-- Tags on a `test.describe(...)` apply to every test inside it.
-- Playwright annotations work the same way: `annotation: [{ type: 'story', description: 'SHOP-231' }]`.
+`priority`, `severity`, `owner`, `feature`, `epic`, `story`, `issue`, `component`, `team` are known out of the box. Anything else you pass is shown too.
 
-**Steps: `test.step()`.** Each step shows with its time and its share of the test.
-
-**Logs: `console.log()`.** Lines printed during a test show under "Console output".
-
-**Test data: attach JSON or CSV.**
-
-```ts
-await test.info().attach('Login', { body: JSON.stringify(user), contentType: 'application/json' });
-await test.info().attach('users.csv', { body: csvText, contentType: 'text/csv' });
-```
-
-An object becomes a key/value block. An array of objects, or a CSV, becomes a table.
-
-**API calls: one import in the config.** See [API calls, recorded automatically](#api-calls-recorded-automatically).
-
-**Prefer one-liners?** The same things as small helpers, if you like them better:
-
-```ts
-import { meta, log, testData } from 'reporting-labs';
-
-meta({ priority: 'P0', severity: 'blocker', owner: 'naveen', feature: 'payment', story: 'SHOP-250' });
-await log('cart is empty');                 // adds a timestamp
-await testData(user, 'Login');              // object → key/value, array → table, CSV string → table
-```
-
-Both forms give the same report. Secrets are masked in both: passwords, tokens, API keys, `Authorization` / `Cookie` headers, JWTs and `Bearer ...` values become `****`. Add your own keys with `maskKeys: ['otp', 'pan']`.
+Full example: [examples/01-tag-your-tests.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/01-tag-your-tests.spec.ts).
 
 Turn story, epic or issue keys into links:
 
@@ -190,7 +163,19 @@ Turn story, epic or issue keys into links:
 links: { story: 'https://acme.atlassian.net/browse/{id}', epic: 'https://acme.atlassian.net/browse/{id}' }
 ```
 
-Full examples: [01-tag-your-tests.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/01-tag-your-tests.spec.ts) and [02-logs-and-test-data.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/02-logs-and-test-data.spec.ts).
+## Logs and test data
+
+```ts
+import { log, testData } from 'reporting-labs';
+
+test('creates an order', async ({ request }) => {
+  await log('starting with an empty cart');                                 // timestamped log line
+
+  await testData({ user: 'naveen@x.com', password: 'S3cret' }, 'Login');    // object → key/value block
+  await testData(rowsFromExcelOrJson, 'Coupons');                           // array of objects → table
+  await testData(fs.readFileSync('data/users.csv', 'utf8'), 'users.csv');   // CSV string → table
+});
+```
 
 ## API calls, recorded automatically
 
@@ -213,7 +198,7 @@ Each call shows up in the test detail and in the **API** tab with method, URL, s
 
 Calls that do not go through Playwright (axios, `fetch`, a Java service in the same pipeline) can still be recorded by hand with `api({ method, url, status, duration, requestBody, responseBody })`.
 
-Full example: [03-api-calls.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/03-api-calls.spec.ts).
+Full examples: [02-logs-and-test-data.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/02-logs-and-test-data.spec.ts) and [03-api-calls.spec.ts](https://github.com/naveenautomationlabs/reporting-labs/blob/main/examples/03-api-calls.spec.ts). Passwords, tokens, API keys, `Authorization` / `Cookie` headers, JWTs and `Bearer …` values are masked as `****` everywhere. Add your own keys with `maskKeys: ['otp', 'pan']`.
 
 ## Run history: new vs known, flaky, slower
 
