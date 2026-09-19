@@ -383,8 +383,8 @@ li.collapsed>ul{display:none}
 .wk .n{font:11px var(--mono);color:var(--ink-3);text-align:right}
 .wk-sum{font-size:13px;color:var(--ink-2);margin-bottom:10px}
 /* list: group toggle + folder tree */
-.tools .seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
-.tools .seg button{padding:6px 10px;font-size:12px;color:var(--ink-2)} .tools .seg button[aria-pressed=true]{background:var(--surface-2);color:var(--ink)}
+.tools .seg,.bug-tools .seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.tools .seg button,.bug-tools .seg button{padding:6px 10px;font-size:12px;color:var(--ink-2);cursor:pointer} .tools .seg button[aria-pressed=true],.bug-tools .seg button[aria-pressed=true]{background:var(--surface-2);color:var(--ink)}
 .folder{display:flex;align-items:center;gap:6px;padding:8px 12px 4px;font:12px var(--mono);color:var(--ink-2);width:100%;text-align:left}
 .folder .cnt{margin-left:auto;display:flex;gap:6px} .folder .cnt b{color:var(--fail)} .folder .cnt span{color:var(--ink-3)}
 .folder .tw{font-size:9px;color:var(--ink-3)}
@@ -541,7 +541,7 @@ html,body{-webkit-font-smoothing:antialiased}
 .tools{padding:12px;gap:8px;background:var(--surface)}
 .tools input,.tools select{border-radius:8px;background:var(--bg);border-color:var(--line)}
 .tools input:focus,.tools select:focus{border-color:var(--accent);outline:0;box-shadow:0 0 0 3px var(--accent-tint)}
-.tools .seg{border-radius:8px} .tools .seg button[aria-pressed=true]{background:var(--accent-tint);color:var(--accent-2);font-weight:500}
+.tools .seg,.bug-tools .seg{border-radius:8px} .tools .seg button[aria-pressed=true],.bug-tools .seg button[aria-pressed=true]{background:var(--accent-tint);color:var(--accent-2);font-weight:500}
 .item{border-left-width:3px;padding:9px 12px}
 .item[aria-current=true]{background:var(--accent-tint);border-left-color:var(--accent)}
 .item .tt .n{font-weight:500}
@@ -1459,14 +1459,14 @@ function bugReport(t, fmt){
 function openBugReport(t){
   let fmt=localStorage.getItem('rl-bug-fmt')||'md';
   const ta=h('textarea',{class:'bug-ta',spellcheck:'false'});
-  const render=()=>{ ta.value=bugReport(t,fmt); seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.f===fmt)); };
+  const render=()=>{ ta.value=bugReport(t,fmt); ta.scrollTop=0; seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.f===fmt)); };
   const seg=h('div',{class:'seg'}, [['md','Markdown'],['jira','Jira'],['text','Plain text']].map(([f,l])=>h('button',{'data-f':f,onclick:()=>{fmt=f; try{localStorage.setItem('rl-bug-fmt',f);}catch(e){} render();}},l)));
   const dlg=h('div',{class:'bugdlg',onclick:e=>{ if(e.target===dlg) dlg.remove(); }},
     h('div',{class:'bug-box',role:'dialog','aria-label':'Bug report'},
       h('div',{class:'bug-head'}, h('h3',{},'Bug report'), h('span',{class:'hint'},'Edit the text if you like, then copy it into Jira, GitHub, Azure DevOps or an email.'), h('button',{class:'btn',onclick:()=>dlg.remove()},'Close')),
       h('div',{class:'bug-tools'}, seg, h('div',{class:'grow'}), h('button',{class:'btn',onclick:()=>download((fileStem()+'-'+t.title.replace(/[^a-z0-9]+/gi,'-').toLowerCase()).slice(0,80)+(fmt==='md'?'.md':'.txt'), ta.value, 'text/plain')},'Download'), h('button',{class:'btn primary',onclick:e=>copyText(ta.value,e.currentTarget,'Copied')},'Copy')),
       ta));
-  render(); document.body.append(dlg); ta.focus();
+  render(); document.body.append(dlg); ta.scrollTop=0; try{ ta.focus({preventScroll:true}); ta.setSelectionRange(0,0); }catch(e){}
 }
 function lightbox(src){ const lb=h('div',{class:'lb',onclick:()=>lb.remove()}, h('img',{src})); document.body.append(lb); }
 function escape(s){ return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
