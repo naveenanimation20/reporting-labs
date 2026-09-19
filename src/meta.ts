@@ -55,7 +55,10 @@ export async function api(call: ApiCall) {
   await info().attach(call.name ?? `${call.method.toUpperCase()} ${call.url}`, { body: JSON.stringify(call), contentType: 'application/x-rl-api' });
 }
 
-/** Wrap a Playwright APIRequestContext call so it's recorded automatically. */
+/**
+ * @deprecated Import `test` from 'reporting-labs/test' instead: every `request.*` call is then recorded
+ * without a wrapper. Kept for projects that already use it.
+ */
 export async function recordApi<T extends { status(): number; headers(): Record<string, string>; text(): Promise<string>; url(): string }>(
   method: string, url: string, options: { headers?: Record<string, string>; data?: unknown; name?: string } | undefined, run: () => Promise<T>,
 ): Promise<T> {
