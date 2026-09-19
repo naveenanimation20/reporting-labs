@@ -144,7 +144,7 @@ a{color:var(--accent)}
 .donut svg circle{stroke-linecap:butt}
 /* failure clusters */
 .clu{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
-.clu li{border:1px solid var(--line);border-left:3px solid var(--fail);border-radius:var(--radius);padding:8px 10px}
+.clu li{border:1px solid var(--line);border-radius:var(--radius);padding:8px 10px}
 .clu .msg{font:12px/1.45 var(--mono);white-space:pre-wrap;word-break:break-word;color:var(--ink);max-height:3em;overflow:hidden}
 .clu .who{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .clu .who button{font-size:11px;padding:2px 7px;border-radius:999px;background:var(--fail-bg);color:var(--fail)} .clu .who button:hover{outline:1px solid var(--fail)}
@@ -251,7 +251,7 @@ a{color:var(--accent)}
 .tab{padding:8px 12px;font-size:13px;color:var(--ink-2);border-bottom:2px solid transparent;margin-bottom:-1px}
 .tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent)}
 .detail h4{font-size:13px;font-weight:600;color:var(--ink-2);margin:20px 0 8px}
-.err{background:var(--fail-bg);border-left:3px solid var(--fail);padding:12px 14px;border-radius:0 var(--radius) var(--radius) 0;font:12.5px/1.55 var(--mono);white-space:pre-wrap;word-break:break-word;color:var(--ink)}
+.err{background:var(--fail-bg);border:1px solid var(--line);padding:12px 14px;border-radius:var(--radius);font:12.5px/1.55 var(--mono);white-space:pre-wrap;word-break:break-word;color:var(--ink)}
 .err+.err{margin-top:10px}
 .err details{margin-top:8px} .err summary{cursor:pointer;color:var(--ink-2);font-family:var(--sans);font-size:12px}
 .err .stack{color:var(--ink-2);margin-top:6px}
@@ -554,7 +554,7 @@ html,body{-webkit-font-smoothing:antialiased}
 .tabs{gap:6px} .tab{border-radius:8px 8px 0 0;font-weight:500}
 .tab[aria-selected=true]{color:var(--accent-2);border-bottom-color:var(--accent)}
 .detail h4{color:var(--accent-2);text-transform:uppercase;letter-spacing:.06em;font-size:11.5px}
-.err{border-radius:0 8px 8px 0}
+.err{border-radius:8px}
 .meta{border-radius:8px;background:var(--surface)}
 .meta .k{text-transform:uppercase;font-size:10.5px;letter-spacing:.05em}
 .step{border-radius:6px} .step .cat{border-radius:4px}
@@ -595,12 +595,12 @@ html,body{-webkit-font-smoothing:antialiased}
 .note{padding:10px 14px;border-radius:8px;margin-bottom:10px;border:1px solid var(--line)} .note.ok{background:var(--pass-bg);color:var(--ink)} .note.warn{background:var(--flaky-bg);color:var(--flaky-ink)}
 .badge.xfail{background:var(--flaky-bg);color:var(--flaky-ink)}
 .errwrap+.errwrap{margin-top:14px}
-.why{border:1px solid var(--line);border-left:3px solid var(--fail);border-radius:0 var(--radius) var(--radius) 0;padding:10px 14px;margin-bottom:10px;background:var(--surface)}
+.why{border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;margin-bottom:10px;background:var(--surface)}
 .why-c{font-size:12.5px;color:var(--ink);margin-bottom:2px;line-height:1.4} .why-c .why-k{margin-right:2px}
 .why-l{display:flex;align-items:center;gap:8px;margin-bottom:4px} .why-k{font-size:12px;font-weight:600;color:var(--fail)} .why-a{font:11.5px var(--mono);color:var(--ink-3)}
 .why-s{font-size:var(--fs);color:var(--ink);line-height:1.45} .why-h{font-size:12.5px;color:var(--ink-2);margin-top:4px;line-height:1.45}
-.why.assertion,.why.visual{border-left-color:#C77D14} .why.assertion .why-k,.why.visual .why-k{color:#9A6A00}
-.why.script,.why.thrown,.why.file{border-left-color:var(--ink-3)} .why.script .why-k,.why.thrown .why-k,.why.file .why-k{color:var(--ink-2)}
+.why.assertion .why-k,.why.visual .why-k{color:#9A6A00}
+.why.script .why-k,.why.thrown .why-k,.why.file .why-k{color:var(--ink-2)}
 .errloc{font-family:var(--mono);color:var(--ink-3);margin-bottom:6px} .errloc a{color:var(--accent-2);text-decoration:none} .errloc a:hover{text-decoration:underline}
 .snip{margin:10px 0 0;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:var(--mono);line-height:1.55;white-space:pre;overflow:auto;color:var(--ink-2)}
 /* ---------- triage extras: history, diff, export, env, heatmap ---------- */
