@@ -54,6 +54,7 @@ const config: ReportingLabsOptions = {
   // },
 
   // ── Widgets on the overview (hide what you do not need) ──────────────────────
+  // Failure clusters and the Trend chart are always shown.
   // widgets: {
   //   runStrip: true,        // pass/fail strip under the header
   //   outcome: true,         // outcome ring

@@ -232,7 +232,7 @@ Every option is optional. `npx reporting-labs init` writes them all, with commen
 | `maskKeys` | `[]` | Extra keys to mask as `****` |
 | `dimensions` | `['priority','severity','feature','owner']` | Meta keys that get charts and filters |
 | `dimensionOrder` | P0…P4, blocker…trivial | Sort order per dimension |
-| `widgets` | all on | Hide cards: `{ tags: false, timeline: false, ... }` |
+| `widgets` | all on | Hide cards: `{ tags: false, timeline: false, ... }`. Failure clusters and the Trend chart are always shown |
 | `sections` | `[]` | Extra HTML below the summary, e.g. release notes |
 | `history` | `{ enabled: true, keep: 30 }` | Run history file; `file` sets a custom path |
 | `palette` | `'lab'` | `'lab'` (blue), `'ocean'`, `'ember'`, `'mono'` |
