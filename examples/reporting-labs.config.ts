@@ -1,3 +1,4 @@
+import 'reporting-labs/auto';   // records every request.* / page.request call in the report
 import type { ReportingLabsOptions } from 'reporting-labs';
 
 // Every option is optional. Delete what you do not need.

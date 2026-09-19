@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { meta, api } from 'reporting-labs';
 
 // Nothing special in these tests: plain Playwright `request` calls against the public
-// https://gorest.in API. `import 'reporting-labs/auto'` in playwright.config.ts records every
+// https://gorest.in API. `import 'reporting-labs/auto'` (first line of reporting-labs.config.ts) records every
 // one of them (method, URL, status, timing, headers, request + response body, a cURL command)
 // in the test detail and the API tab. The Bearer token is masked automatically.
 //

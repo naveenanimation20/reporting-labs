@@ -1,32 +1,45 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const [cmd] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const cmd = args[0];
+const has = f => args.includes(f);
 
 if (cmd === 'init') {
-  const file = path.resolve('reporting-labs.config.ts');
-  if (fs.existsSync(file)) { console.log('reporting-labs.config.ts already exists.'); process.exit(0); }
-  fs.writeFileSync(file, `import type { ReportingLabsOptions } from 'reporting-labs';
-
-const config: ReportingLabsOptions = {
-  title: 'My app – regression',
-  // logo: 'https://example.com/logo.svg',
-  palette: 'lab',            // 'lab' (blue) | 'ocean' | 'ember' | 'mono'
-  theme: 'auto',
-  metadata: { env: process.env.TEST_ENV ?? 'local', branch: process.env.GIT_BRANCH ?? 'main' },
-  links: { story: 'https://acme.atlassian.net/browse/{id}' },
-  sections: [],
-};
-export default config;
-`);
-  console.log('Created reporting-labs.config.ts');
-  console.log("Add to playwright.config.ts:  reporter: [['reporting-labs', require('./reporting-labs.config').default]]");
+  const js = has('--js');
+  const file = path.resolve(js ? 'reporting-labs.config.js' : 'reporting-labs.config.ts');
+  if (fs.existsSync(file) && !has('--force')) {
+    console.log(`${path.basename(file)} already exists. Use --force to overwrite it.`);
+    process.exit(1);
+  }
+  let template = fs.readFileSync(path.join(__dirname, 'config-template.txt'), 'utf8');
+  if (js) {
+    template = template
+      .replace("import 'reporting-labs/auto';", "require('reporting-labs/auto');")
+      .replace("import type { ReportingLabsOptions } from 'reporting-labs';\n", '')
+      .replace('const config: ReportingLabsOptions = {', "/** @type {import('reporting-labs').ReportingLabsOptions} */\nconst config = {")
+      .replace('export default config;', 'module.exports = config;');
+  }
+  fs.writeFileSync(file, template);
+  const base = path.basename(file, path.extname(file));
+  console.log(`Created ${path.basename(file)} with every option listed. Uncomment what you need.`);
+  console.log('');
+  console.log(`Now in playwright.config.${js ? 'js' : 'ts'}:`);
+  if (js) {
+    console.log(`  const reportingLabs = require('./${base}');`);
+  } else {
+    console.log(`  import reportingLabs from './${base}';`);
+  }
+  console.log("  reporter: [['list'], ['reporting-labs', reportingLabs]],");
 } else {
   console.log(`reporting-labs
 
-  npx reporting-labs init     create a starter config file
+  npx reporting-labs init            write reporting-labs.config.ts with every option, commented
+  npx reporting-labs init --js       same, as reporting-labs.config.js
+  npx reporting-labs init --force    overwrite an existing config file
 
-Usage in playwright.config.ts:
-  reporter: [['reporting-labs', { title: 'My report' }]]
+Then in playwright.config.ts:
+  import reportingLabs from './reporting-labs.config';
+  reporter: [['list'], ['reporting-labs', reportingLabs]],
 `);
 }
