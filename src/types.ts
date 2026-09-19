@@ -1,7 +1,7 @@
 export interface ReportingLabsOptions {
   /** Report title shown in the header. Default: "Test report" */
   title?: string;
-  /** Path or data-URI of a logo image. Optional. */
+  /** Your logo: a file path relative to the config (e.g. 'logo.png', embedded into the report), an https URL, or a data URI. */
   logo?: string;
   /** Override the palette accent with your brand color, e.g. '#7C3AED'. Default: the palette's own accent (royal blue for `lab`). */
   accent?: string;
