@@ -35,6 +35,52 @@ open reporting-labs/index.html
 
 That is all. Everything below is optional.
 
+## Keep the reporter options in their own file (recommended)
+
+As soon as you set more than a title, put the reportingLabs options in a separate file. Your `playwright.config.ts` stays short, and all report settings live in one place.
+
+**Step 1.** Create the file (or let the CLI do it with `npx reporting-labs init`):
+
+```ts
+// reporting-labs.config.ts  (next to playwright.config.ts)
+import type { ReportingLabsOptions } from 'reporting-labs';
+
+const config: ReportingLabsOptions = {
+  title: 'My app – regression',
+  outputFolder: 'reports/reporting-labs',
+  embedVideos: true,
+  metadata: { env: process.env.TEST_ENV ?? 'local' },
+  // links: { story: 'https://yourteam.atlassian.net/browse/{id}' },
+};
+
+export default config;
+```
+
+**Step 2.** Import it in `playwright.config.ts` and add one line to your reporter list. Your other reporters keep working as before.
+
+```ts
+import { defineConfig } from '@playwright/test';
+import reportingLabs from './reporting-labs.config';
+
+export default defineConfig({
+  reporter: [
+    ['list'],
+    ['html', { open: 'never' }],
+    ['reporting-labs', reportingLabs],   // <- this line
+  ],
+});
+```
+
+That is it. The `ReportingLabsOptions` type gives you autocomplete for every option in your editor.
+
+If your reporter list differs between CI and local (a common pattern), add the same line to both branches:
+
+```ts
+reporter: process.env.CI
+  ? [['blob'], ['html', { open: 'never' }], ['reporting-labs', reportingLabs]]
+  : [['list'], ['html', { open: 'never' }], ['reporting-labs', reportingLabs]],
+```
+
 ## A tour of the report
 
 ### Overview: the state of the run in one screen
@@ -194,7 +240,7 @@ reporter: [['reporting-labs', {
 }]]
 ```
 
-`npx reporting-labs init` writes a starter `reporting-labs.config.ts`.
+`npx reporting-labs init` writes a starter `reporting-labs.config.ts`; see [Keep the reporter options in their own file](#keep-the-reporter-options-in-their-own-file-recommended).
 
 ## Running in CI
 
