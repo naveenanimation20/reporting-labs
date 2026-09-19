@@ -140,7 +140,7 @@ export default class ReportingLabsReporter implements Reporter {
       globalOutput: this.globalOutput,
       shard: this.config.shard ? { current: this.config.shard.current, total: this.config.shard.total } : undefined,
       options: {
-        logo: this.options.logo,
+        logo: this.resolveLogo(this.options.logo),
         accent: this.options.accent,
         theme: this.options.theme ?? 'auto',
         palette: this.options.palette ?? 'lab',
@@ -272,6 +272,18 @@ export default class ReportingLabsReporter implements Reporter {
       if (dims.includes(k) && a.description) meta[k] = a.description;
     }
     return meta;
+  }
+
+  /** A local image file (path relative to the config) is embedded as a data URI so the report stays self-contained. URLs and data URIs pass through. */
+  private resolveLogo(logo?: string): string | undefined {
+    if (!logo || /^(https?:|data:)/i.test(logo)) return logo;
+    const base = this.config.configFile ? path.dirname(this.config.configFile) : this.config.rootDir;
+    const file = path.resolve(base, logo);
+    if (!fs.existsSync(file)) { console.warn(`reporting-labs: logo not found at ${file}`); return undefined; }
+    const mime: Record<string, string> = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.svg': 'image/svg+xml', '.gif': 'image/gif', '.webp': 'image/webp', '.ico': 'image/x-icon' };
+    const type = mime[path.extname(file).toLowerCase()];
+    if (!type) { console.warn(`reporting-labs: logo ${logo} is not a png, jpg, svg, gif or webp file`); return undefined; }
+    return `data:${type};base64,${fs.readFileSync(file).toString('base64')}`;
   }
 
   private rel(file: string): string {

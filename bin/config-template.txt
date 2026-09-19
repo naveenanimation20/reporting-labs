@@ -9,7 +9,7 @@ const config: ReportingLabsOptions = {
 
   // ── Look ─────────────────────────────────────────────────────────────────────
   title: 'My app – regression',                       // shown in the header
-  // logo: 'https://example.com/logo.svg',            // path, URL or data URI; shown next to the title
+  // logo: 'logo.png',                               // your logo next to the title: a file next to this config (embedded), or an https URL
   // palette: 'lab',                                  // 'lab' (blue, default) | 'ocean' | 'ember' | 'mono'; viewers can switch
   // accent: '#7C3AED',                               // your brand color instead of the palette accent
   // theme: 'auto',                                   // 'auto' (follows OS, default) | 'light' | 'dark'

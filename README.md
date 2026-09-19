@@ -224,7 +224,7 @@ Every option is optional. `npx reporting-labs init` writes them all, with commen
 | Option | Default | What it does |
 |---|---|---|
 | `title` | `'Test report'` | Title in the header |
-| `logo` | – | Path, URL or data URI of your logo |
+| `logo` | – | Your logo next to the title: `'logo.png'` (a file next to the config, embedded in the report) or an https URL |
 | `project` | – | `{ name, version, team, url }` shown under the title |
 | `metadata` | `{}` | Chips in the header, e.g. `{ env: 'staging', build: '#1842' }`. `build` labels the run in the trend; in CI the run number is used when it is not set |
 | `env` | – | Extra rows on the Environment card |
