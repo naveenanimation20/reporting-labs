@@ -160,6 +160,7 @@ Run it two or three times to see the history features (new vs known failures, fl
 
 ### Failures: everything you need to triage
 
+- **Bug report** button on every failed test: a ready-to-paste ticket with priority, owner, story, environment, test data, steps to reproduce (taken from the test's own steps, the failing one marked), expected vs actual, the error, API calls and attachment names. Pick Markdown, Jira or plain text, edit if you like, copy or download.
 - **By owner**: who to ping, with failed and flaky counts. Click an owner to filter.
 - **Download CSV / JSON**: all failed and flaky tests with title, spec, project, priority, owner, ticket, attempts, duration, first error line and new/known status. Ready for Jira or a sheet.
 - **Copy summary**: a Slack or Teams message with the top failures, owners and ticket keys.

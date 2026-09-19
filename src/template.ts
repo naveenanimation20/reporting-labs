@@ -274,6 +274,13 @@ li.collapsed>ul{display:none}
 .att .file a{font:12px var(--mono)}
 .txt{background:var(--surface-2);padding:10px 12px;border-radius:var(--radius);font:12px/1.5 var(--mono);white-space:pre-wrap;max-height:260px;overflow:auto}
 .lb{position:fixed;inset:0;background:rgba(0,0,0,.85);display:grid;place-items:center;z-index:10;cursor:zoom-out}
+.bugdlg{position:fixed;inset:0;background:rgba(10,20,40,.55);display:grid;place-items:center;z-index:11;padding:20px}
+.bug-box{background:var(--surface);color:var(--ink);border-radius:12px;width:min(860px,100%);max-height:92vh;display:flex;flex-direction:column;box-shadow:0 30px 80px -20px rgba(0,0,0,.5);border:1px solid var(--line)}
+.bug-head{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line)} .bug-head h3{margin:0;font-size:16px} .bug-head .hint{flex:1;color:var(--ink-3);font-size:12px}
+.bug-tools{display:flex;align-items:center;gap:8px;padding:10px 18px;border-bottom:1px solid var(--line)} .bug-tools .grow{flex:1}
+.bug-ta{flex:1;min-height:360px;margin:0;padding:14px 18px;border:0;resize:none;background:var(--surface-2);color:var(--ink);font:12.5px/1.55 var(--mono);outline:none;border-radius:0 0 12px 12px;white-space:pre}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff} .btn.primary.done{background:var(--pass);border-color:var(--pass)}
+.detail .actions .btn{cursor:pointer}
 .lb img{max-width:95vw;max-height:95vh;border-radius:4px}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13px}
 .kv dt{color:var(--ink-3)} .kv dd{margin:0}
@@ -376,8 +383,8 @@ li.collapsed>ul{display:none}
 .wk .n{font:11px var(--mono);color:var(--ink-3);text-align:right}
 .wk-sum{font-size:13px;color:var(--ink-2);margin-bottom:10px}
 /* list: group toggle + folder tree */
-.tools .seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
-.tools .seg button{padding:6px 10px;font-size:12px;color:var(--ink-2)} .tools .seg button[aria-pressed=true]{background:var(--surface-2);color:var(--ink)}
+.tools .seg,.bug-tools .seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.tools .seg button,.bug-tools .seg button{padding:6px 10px;font-size:12px;color:var(--ink-2);cursor:pointer} .tools .seg button[aria-pressed=true],.bug-tools .seg button[aria-pressed=true]{background:var(--surface-2);color:var(--ink)}
 .folder{display:flex;align-items:center;gap:6px;padding:8px 12px 4px;font:12px var(--mono);color:var(--ink-2);width:100%;text-align:left}
 .folder .cnt{margin-left:auto;display:flex;gap:6px} .folder .cnt b{color:var(--fail)} .folder .cnt span{color:var(--ink-3)}
 .folder .tw{font-size:9px;color:var(--ink-3)}
@@ -534,7 +541,7 @@ html,body{-webkit-font-smoothing:antialiased}
 .tools{padding:12px;gap:8px;background:var(--surface)}
 .tools input,.tools select{border-radius:8px;background:var(--bg);border-color:var(--line)}
 .tools input:focus,.tools select:focus{border-color:var(--accent);outline:0;box-shadow:0 0 0 3px var(--accent-tint)}
-.tools .seg{border-radius:8px} .tools .seg button[aria-pressed=true]{background:var(--accent-tint);color:var(--accent-2);font-weight:500}
+.tools .seg,.bug-tools .seg{border-radius:8px} .tools .seg button[aria-pressed=true],.bug-tools .seg button[aria-pressed=true]{background:var(--accent-tint);color:var(--accent-2);font-weight:500}
 .item{border-left-width:3px;padding:9px 12px}
 .item[aria-current=true]{background:var(--accent-tint);border-left-color:var(--accent)}
 .item .tt .n{font-weight:500}
@@ -1294,7 +1301,7 @@ function renderDetail(t){
   d.append(h('div',{class:'crumb'}, [t.file, ...t.path.map(p=>data.bdd&&!/^Feature:/i.test(p)?'Feature: '+p:p)].map(p=>h('span',{},p))),
     h('div',{class:'titlebar'}, h('h3',{},t.title), h('div',{class:'actions'},
       h('button',{class:'btn',onclick:e=>copyText(location.href.split('#')[0]+'#t='+t.id,e.currentTarget,'Link copied')},'Copy link'),
-      (()=>{ const r=t.results[t.results.length-1]; const e=r&&r.errors[0]; return e? h('button',{class:'btn',onclick:ev=>copyText(t.title+'\n'+t.file+':'+t.line+'\n\n'+e.message,ev.currentTarget,'Error copied')},'Copy error') : null; })(),
+      (()=>{ const r=t.results[t.results.length-1]; const e=r&&r.errors[0]; return e? [h('button',{class:'btn',onclick:ev=>copyText(t.title+'\n'+t.file+':'+t.line+'\n\n'+e.message,ev.currentTarget,'Error copied')},'Copy error'), h('button',{class:'btn primary',onclick:()=>openBugReport(t)},'Bug report')] : null; })(),
       editorLink(t))),
     h('div',{class:'badges'}, h('span',{class:'badge '+t.outcome},label[t.outcome]), t.expectedFailure? h('span',{class:'badge xfail',title:'Marked test.fail(): failing is the expected result'},'Expected failure') : null, sinceBadge(t), dots(t,10), data.bdd?h('span',{class:'badge scenario'},'Scenario'):null, t.tags.map(g=>h('span',{class:'badge tag'},g)), data.projects.length>1?h('span',{class:'badge tag'},t.project):null, h('span',{class:'loc'}, t.file+':'+t.line+' · '+ms(t.duration)+(t.outcome==='timedOut'&&t.timeout?' · timeout '+ms(t.timeout):'')+(t.retries?' · retries '+t.retries:''))));
   const metaKeys=Object.keys(t.meta);
@@ -1397,6 +1404,69 @@ function compare(set){
   const render=()=>{ stage.innerHTML=''; stage.append(views[cur]()); tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===cur)); };
   for(const [v,l] of [['slider','Slider'],['side','Side by side'],['diff','Diff']]) tabs.append(h('button',{class:'tab','data-v':v,onclick:()=>{cur=v;render();}},l));
   wrap.append(tabs,stage); render(); return wrap;
+}
+/* ---- bug report: a ready-to-paste ticket built from the failure ---- */
+function bugModel(t){
+  const r=t.results[t.results.length-1], e=r&&r.errors[0], x=e&&e.explain, msg=e?e.message:'';
+  const ex=msg.match(/^(Expected[^:\n]{0,40}):[ \t]*(.+)$/m), rc=msg.match(/^(Received[^:\n]{0,40}):[ \t]*(.+)$/m);
+  const si=sinceInfo(t);
+  const steps=[]; const walk=(list,depth)=>{ for(const st of list){ if(st.category==='hook'||/^Attach "/.test(st.title)||/^Worker Cleanup/.test(st.title)) continue; const user=st.category==='test.step'; if(user||depth===0) steps.push({title:st.title.replace(/^(Given|When|Then|And|But)\s+/,m=>m), failed:!!st.error, user}); if(user&&st.steps.length&&!st.steps.some(c=>c.category==='test.step')) continue; if(st.steps.length) walk(st.steps,depth+1); } };
+  if(r) walk(r.steps,0);
+  const userSteps=steps.filter(s=>s.user); const repro=(userSteps.length?userSteps:steps).filter(s=>!/^Expect "/.test(s.title)||s.failed);
+  const env=[]; if(data.options.project&&data.options.project.name) env.push(['Application', data.options.project.name+(data.options.project.version?' v'+data.options.project.version:'')]);
+  for(const [k,v] of Object.entries(data.metadata||{})) env.push([k,v]);
+  if(data.projects.length>1||t.project) env.push(['Playwright project', t.project]);
+  for(const row of (data.env||[])) if(!/^(Workers|Shard)$/.test(row.k)) env.push([row.k, row.href&&row.href!==row.v? row.v+' ('+row.href+')' : row.v]);
+  const dataBlocks=(r?r.data:[]).map(b=>{ if(b.kind==='kv') return {name:b.name, lines:b.kv.map(([k,v])=>k+': '+v)}; if(b.kind==='table') return {name:b.name, lines:b.rows.slice(0,5).map(row=>row.map((c,i)=>(b.columns[i]||'')+'='+c).join(', ')).concat(b.rows.length>5?['… '+(b.rows.length-5)+' more rows']:[])}; return {name:b.name, lines:[String(b.text||'').slice(0,300)]}; });
+  const api=(r?r.api:[]).map(c=>c.method.toUpperCase()+' '+c.url+' → '+(c.status||'no response')+(c.duration!=null?' ('+ms(c.duration)+')':''));
+  const logs=(r?r.logs:[]).slice(-8).map(l=>l.msg);
+  const att=(r?r.attachments:[]).filter(a=>a.contentType.startsWith('image/')||a.contentType.startsWith('video/')||/zip/.test(a.contentType)).map(a=>{ const kind=a.contentType.startsWith('video/')?'video':/zip/.test(a.contentType)?'trace':'screenshot'; return a.name.toLowerCase()===kind? kind : a.name+' ('+kind+')'; });
+  const expected= ex? ex[2].trim() : (x&&x.kind==='not-found'? 'The element is present and the step completes.' : x&&x.kind==='not-visible'? 'The element is visible.' : x&&/^(network|navigation)$/.test(x.kind)? 'The page loads.' : x&&x.kind==='api'? 'The API responds successfully.' : 'The step completes and the test passes.');
+  const actual= rc? rc[2].trim() : (x? x.summary : msg.split('\n')[0]);
+  return { t, r, e, x, si, repro, env, dataBlocks, api, logs, att, expected, actual,
+    title: t.title+(x? ' – '+x.label.toLowerCase() : ''),
+    where: t.file+':'+t.line+(data.projects.length>1?' ['+t.project+']':''),
+    history: si? (si.kind==='new'? 'New failure in this run' : 'Failing since '+runLabel(si.since)) : (t.outcome==='flaky'? 'Flaky: passed on retry' : ''),
+    attempts: t.results.length, when: new Date(data.startTime).toLocaleString() };
+}
+function bugReport(t, fmt){
+  const m=bugModel(t), L=[];
+  const H=(txt)=> fmt==='jira'? 'h3. '+txt : fmt==='md'? '### '+txt : txt.toUpperCase();
+  const B=(txt)=> fmt==='text'? txt : '*'+txt+'*';
+  const FENCE=String.fromCharCode(96,96,96);
+  const code=(txt)=> fmt==='jira'? ['{code}',txt,'{code}'] : fmt==='md'? [FENCE,txt,FENCE] : [txt];
+  const li=(i,txt)=> (fmt==='jira'? '# ' : (i+1)+'. ')+txt;
+  const bullet=(txt)=> (fmt==='jira'? '* ' : '- ')+txt;
+  const kv=(k,v)=> fmt==='text'? k+': '+v : (fmt==='jira'? '*'+k+':* ' : '**'+k+':** ')+v;
+  L.push(fmt==='jira'? 'h2. '+m.title : fmt==='md'? '## '+m.title : m.title, '');
+  const pr=[m.t.meta.priority, m.t.meta.severity].filter(Boolean).join(' / ');
+  if(pr) L.push(kv('Priority', pr)); if(m.t.meta.owner) L.push(kv('Owner', m.t.meta.owner)); if(m.t.meta.feature) L.push(kv('Feature', m.t.meta.feature));
+  for(const k of ['story','epic','issue']) if(m.t.meta[k]) L.push(kv(k[0].toUpperCase()+k.slice(1), m.t.meta[k]));
+  L.push(kv('Test', m.where), kv('Run', m.when+(m.attempts>1?' · failed '+m.attempts+' attempts':'')+(m.history?' · '+m.history:'')), '');
+  if(m.x){ L.push(H('Summary'), m.x.summary, ''); }
+  if(m.env.length){ L.push(H('Environment')); for(const [k,v] of m.env) L.push(bullet(k+': '+v)); L.push(''); }
+  if(m.dataBlocks.length){ L.push(H('Test data')); for(const b of m.dataBlocks){ L.push(B(b.name)); for(const ln of b.lines) L.push(bullet(ln)); } L.push(''); }
+  L.push(H('Steps to reproduce'));
+  if(m.repro.length) m.repro.forEach((s,i)=>L.push(li(i, s.title+(s.failed?'  ← fails here':'')))); else L.push(li(0,'Run the test: '+m.where));
+  L.push('', H('Expected result'), m.expected, '', H('Actual result'), m.actual, '');
+  if(m.e){ L.push(H('Error')); L.push(...code(m.e.message.split('\n').slice(0,12).join('\n').trim())); L.push(''); }
+  if(m.api.length){ L.push(H('API calls')); for(const a of m.api) L.push(bullet(a)); L.push(''); }
+  if(m.logs.length){ L.push(H('Test log')); L.push(...code(m.logs.join('\n'))); L.push(''); }
+  if(m.att.length){ L.push(H('Attachments')); L.push('In the report next to this test: '+m.att.join(', ')); L.push(''); }
+  L.push(fmt==='text'? 'Generated by reportingLabs' : '_Generated by reportingLabs_');
+  return L.join('\n').replace(/\n{3,}/g,'\n\n');
+}
+function openBugReport(t){
+  let fmt=localStorage.getItem('rl-bug-fmt')||'md';
+  const ta=h('textarea',{class:'bug-ta',spellcheck:'false'});
+  const render=()=>{ ta.value=bugReport(t,fmt); ta.scrollTop=0; seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.f===fmt)); };
+  const seg=h('div',{class:'seg'}, [['md','Markdown'],['jira','Jira'],['text','Plain text']].map(([f,l])=>h('button',{'data-f':f,onclick:()=>{fmt=f; try{localStorage.setItem('rl-bug-fmt',f);}catch(e){} render();}},l)));
+  const dlg=h('div',{class:'bugdlg',onclick:e=>{ if(e.target===dlg) dlg.remove(); }},
+    h('div',{class:'bug-box',role:'dialog','aria-label':'Bug report'},
+      h('div',{class:'bug-head'}, h('h3',{},'Bug report'), h('span',{class:'hint'},'Edit the text if you like, then copy it into Jira, GitHub, Azure DevOps or an email.'), h('button',{class:'btn',onclick:()=>dlg.remove()},'Close')),
+      h('div',{class:'bug-tools'}, seg, h('div',{class:'grow'}), h('button',{class:'btn',onclick:()=>download((fileStem()+'-'+t.title.replace(/[^a-z0-9]+/gi,'-').toLowerCase()).slice(0,80)+(fmt==='md'?'.md':'.txt'), ta.value, 'text/plain')},'Download'), h('button',{class:'btn primary',onclick:e=>copyText(ta.value,e.currentTarget,'Copied')},'Copy')),
+      ta));
+  render(); document.body.append(dlg); ta.scrollTop=0; try{ ta.focus({preventScroll:true}); ta.setSelectionRange(0,0); }catch(e){}
 }
 function lightbox(src){ const lb=h('div',{class:'lb',onclick:()=>lb.remove()}, h('img',{src})); document.body.append(lb); }
 function escape(s){ return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
